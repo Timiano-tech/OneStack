@@ -46,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={[
-              'w-full rounded-xl border bg-white py-2.5 text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500',
+              'w-full rounded-xl border bg-white py-2.5 text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#D60000] focus:ring-offset-1 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500',
               hasIcon && LeftIcon && 'pl-10',
               hasIcon && RightIcon && 'pr-10',
               !hasIcon && 'px-4',

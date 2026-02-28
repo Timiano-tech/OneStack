@@ -32,7 +32,7 @@ export function BottomNav() {
             >
               {primary ? (
                 <motion.span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D60000] text-white shadow-lg shadow-red-500/30"
                   whileTap={{ scale: 0.92 }}
                 >
                   <Icon size={24} />
@@ -41,7 +41,7 @@ export function BottomNav() {
                 <span
                   className={`flex items-center justify-center rounded-xl p-2 transition-colors ${
                     active
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-red-600 dark:text-red-400'
                       : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
@@ -50,7 +50,7 @@ export function BottomNav() {
               )}
               <span
                 className={`text-[10px] font-medium ${
-                  active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                  active ? 'text-red-600 dark:text-red-400' : 'text-slate-500 dark:text-slate-400'
                 } ${primary ? 'mt-0' : ''}`}
               >
                 {label}

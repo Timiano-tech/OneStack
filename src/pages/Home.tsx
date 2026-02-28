@@ -78,10 +78,10 @@ export function Home() {
   return (
     <AnimatedPage className="bg-slate-50 dark:bg-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-8 text-white sm:py-12">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#D60000] to-black px-4 py-8 text-white sm:py-12">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60" />
         <div className="relative mx-auto max-w-lg sm:max-w-7xl">
-          <p className="text-sm font-medium text-emerald-100">{SITE.campus.shortName}</p>
+          <p className="text-sm font-medium text-red-100">{SITE.campus.shortName}</p>
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ export function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.08 }}
-            className="mt-2 max-w-md text-sm text-emerald-50 sm:text-base"
+            className="mt-2 max-w-md text-sm text-red-50 sm:text-base"
           >
             Buy, sell, and trade with verified FUT Ilaro students. Items, services & more—all in one app.
           </motion.p>
@@ -108,7 +108,7 @@ export function Home() {
               <Button
                 size="md"
                 variant="secondary"
-                className="bg-white text-emerald-700 hover:bg-emerald-50"
+                className="bg-white text-[#D60000] hover:bg-red-50"
                 leftIcon={FiSearch}
               >
                 Browse
@@ -137,7 +137,7 @@ export function Home() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiShield className="text-emerald-500" size={20} />
+            <FiShield className="text-[#D60000]" size={20} />
             <span className="text-xs font-medium sm:text-sm">FUT Ilaro students only</span>
           </motion.div>
           <motion.div
@@ -146,7 +146,7 @@ export function Home() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiMessageCircle className="text-emerald-500" size={20} />
+            <FiMessageCircle className="text-[#D60000]" size={20} />
             <span className="text-xs font-medium sm:text-sm">In-app chat</span>
           </motion.div>
           <motion.div
@@ -155,7 +155,7 @@ export function Home() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiTrendingUp className="text-emerald-500" size={20} />
+            <FiTrendingUp className="text-[#D60000]" size={20} />
             <span className="text-xs font-medium sm:text-sm">Premium boosts</span>
           </motion.div>
         </div>

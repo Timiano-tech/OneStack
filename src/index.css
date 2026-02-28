@@ -3,10 +3,11 @@
 /* Class-based dark mode for Tailwind dark: variant */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* OneStack - Design tokens */
+/* OneStack - Design tokens (brand: #D60000 / black / white) */
 :root {
-  --color-primary: 16 185 129;
-  --color-primary-dark: 5 150 105;
+  /* #D60000 */
+  --color-primary: 214 0 0;
+  --color-primary-dark: 144 0 0;
   --color-surface: 255 255 255;
   --color-surface-elevated: 248 250 252;
   --color-text: 15 23 42;
