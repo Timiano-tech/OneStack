@@ -151,7 +151,9 @@ export function Listings() {
             variant={showFilters ? 'primary' : 'secondary'}
             onClick={() => setShowFilters(!showFilters)}
             leftIcon={FiSliders}
-          />
+          >
+            Filters
+          </Button>
         </div>
         <AnimatePresence>
           {showFilters && (

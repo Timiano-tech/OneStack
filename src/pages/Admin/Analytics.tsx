@@ -67,7 +67,7 @@ export function Analytics() {
       >
         <h2 className="font-semibold text-slate-800 dark:text-slate-100">Last 7 days</h2>
         <div className="mt-6 flex items-end justify-between gap-2">
-          {MOCK_CHART_DATA.map((d, i) => (
+          {MOCK_CHART_DATA.map((d) => (
             <div key={d.label} className="flex flex-1 flex-col items-center gap-2">
               <div className="flex w-full flex-col gap-1">
                 <div

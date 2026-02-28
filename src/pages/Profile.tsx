@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHeart, FiList, FiStar, FiSettings, FiLogOut } from 'react-icons/fi';
+import { FiStar, FiSettings, FiLogOut, FiZap } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
@@ -97,10 +97,23 @@ export function Profile() {
               </p>
             </div>
             <Link to="/profile/settings">
-              <Button variant="ghost" leftIcon={FiSettings} />
+              <Button variant="ghost" leftIcon={FiSettings} aria-label="Settings">
+                Settings
+              </Button>
             </Link>
           </div>
         </div>
+
+        <Link
+          to="/pricing"
+          className="mt-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20"
+        >
+          <span className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
+            <FiZap size={18} />
+            Upgrade to Premium — unlimited listings & boosts
+          </span>
+          <span className="text-xs text-amber-600 dark:text-amber-400">→</span>
+        </Link>
 
         <div className="mt-6 flex gap-2">
           <button

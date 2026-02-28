@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSearch, FiEye, FiTrash2, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2 } from 'react-icons/fi';
 import { AnimatedPage } from '../../components/AnimatedPage';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';

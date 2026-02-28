@@ -1,5 +1,4 @@
-import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Outlet, Link, NavLink } from 'react-router-dom';
 import {
   FiGrid,
   FiUsers,
@@ -22,7 +21,6 @@ const navItems = [
 ];
 
 export function AdminLayout() {
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

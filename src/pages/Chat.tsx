@@ -179,7 +179,9 @@ export function Chat() {
                   onClick={sendMessage}
                   disabled={!input.trim()}
                   leftIcon={FiSend}
-                />
+                >
+                  Send
+                </Button>
               </div>
             </div>
           </div>

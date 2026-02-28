@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiHeart, FiMapPin, FiStar } from 'react-icons/fi';
+import { FiHeart, FiMapPin } from 'react-icons/fi';
 import type { Listing } from '../types';
 
 interface ListingCardProps {

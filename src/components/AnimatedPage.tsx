@@ -6,7 +6,7 @@ const defaultVariants = {
   exit: { opacity: 0, y: -8 },
 };
 
-const defaultTransition = { duration: 0.2, ease: 'easeOut' };
+const defaultTransition = { duration: 0.2, ease: 'easeOut' as const };
 
 interface AnimatedPageProps {
   children: React.ReactNode;

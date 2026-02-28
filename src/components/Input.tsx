@@ -1,5 +1,4 @@
 import { forwardRef } from 'react';
-import { motion } from 'framer-motion';
 import { type IconType } from 'react-icons';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -43,7 +42,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               <LeftIcon size={20} />
             </span>
           )}
-          <motion.input
+          <input
             ref={ref}
             id={inputId}
             className={[

@@ -4,6 +4,7 @@ import { FiSearch, FiPlus, FiShield, FiTrendingUp, FiMessageCircle } from 'react
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
+import { SITE } from '../config/site';
 import type { Listing } from '../types';
 
 // Mock featured listings for demo
@@ -75,46 +76,52 @@ const categories = [
 
 export function Home() {
   return (
-    <AnimatedPage className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <AnimatedPage className="bg-slate-50 dark:bg-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-12 text-white sm:py-16">
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-8 text-white sm:py-12">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60" />
-        <div className="relative mx-auto max-w-7xl">
+        <div className="relative mx-auto max-w-lg sm:max-w-7xl">
+          <p className="text-sm font-medium text-emerald-100">{SITE.campus.shortName}</p>
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+            transition={{ duration: 0.35 }}
+            className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl"
           >
             Your campus marketplace.
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="mt-3 max-w-xl text-emerald-50 sm:text-lg"
+            transition={{ duration: 0.35, delay: 0.08 }}
+            className="mt-2 max-w-md text-sm text-emerald-50 sm:text-base"
           >
-            Buy, sell, and trade with verified students. Services, items, and more—all in one place.
+            Buy, sell, and trade with verified FUT Ilaro students. Items, services & more—all in one app.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="mt-6 flex flex-wrap gap-3"
+            transition={{ duration: 0.35, delay: 0.12 }}
+            className="mt-5 flex flex-wrap gap-2"
           >
             <Link to="/listings">
               <Button
-                size="lg"
+                size="md"
                 variant="secondary"
                 className="bg-white text-emerald-700 hover:bg-emerald-50"
                 leftIcon={FiSearch}
               >
-                Browse listings
+                Browse
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" leftIcon={FiPlus}>
+              <Button size="md" variant="outline" className="border-white text-white hover:bg-white/10" leftIcon={FiPlus}>
                 Get started
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button size="md" variant="ghost" className="text-white hover:bg-white/10">
+                Premium
               </Button>
             </Link>
           </motion.div>
@@ -122,16 +129,16 @@ export function Home() {
       </section>
 
       {/* Trust badges */}
-      <section className="border-b border-slate-200 bg-white px-4 py-6 dark:border-slate-700 dark:bg-slate-800/50">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 text-slate-600 dark:text-slate-400">
+      <section className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-6 text-slate-600 dark:text-slate-400 sm:max-w-7xl sm:gap-8">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiShield className="text-emerald-500" size={24} />
-            <span className="text-sm font-medium">Verified students only</span>
+            <FiShield className="text-emerald-500" size={20} />
+            <span className="text-xs font-medium sm:text-sm">FUT Ilaro students only</span>
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
@@ -139,8 +146,8 @@ export function Home() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiMessageCircle className="text-emerald-500" size={24} />
-            <span className="text-sm font-medium">In-app chat</span>
+            <FiMessageCircle className="text-emerald-500" size={20} />
+            <span className="text-xs font-medium sm:text-sm">In-app chat</span>
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
@@ -148,17 +155,17 @@ export function Home() {
             viewport={{ once: true }}
             className="flex items-center gap-2"
           >
-            <FiTrendingUp className="text-emerald-500" size={24} />
-            <span className="text-sm font-medium">Boost your listings</span>
+            <FiTrendingUp className="text-emerald-500" size={20} />
+            <span className="text-xs font-medium sm:text-sm">Premium boosts</span>
           </motion.div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="px-4 py-8 sm:py-10">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Categories</h2>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="px-4 py-6 sm:py-8">
+        <div className="mx-auto max-w-lg sm:max-w-7xl">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Categories</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {categories.map((cat, i) => (
               <Link key={cat.slug} to={`/listings?category=${cat.slug}`}>
                 <motion.div
@@ -178,10 +185,10 @@ export function Home() {
       </section>
 
       {/* Featured listings */}
-      <section className="px-4 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-7xl">
+      <section className="px-4 pb-8 sm:pb-12">
+        <div className="mx-auto max-w-lg sm:max-w-7xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Featured</h2>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Featured</h2>
             <Link
               to="/listings"
               className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"

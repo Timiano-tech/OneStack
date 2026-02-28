@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUpload, FiX } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -275,9 +275,13 @@ export function CreateListing() {
               className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
             />
             <span className="text-sm text-slate-700 dark:text-slate-300">
-              Boost visibility (premium) — pay to feature this listing
+              Boost visibility (Premium only) — feature at top of feed
             </span>
           </label>
+
+          <p className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+            Free: 3 active listings. <Link to="/pricing" className="font-medium text-emerald-600 dark:text-emerald-400">Upgrade to Premium</Link> for unlimited listings and boosts.
+          </p>
 
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1">
