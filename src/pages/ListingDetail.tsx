@@ -98,7 +98,7 @@ export function ListingDetail() {
 
       <div className="mx-auto max-w-3xl">
         {/* Image gallery */}
-        <div className="relative aspect-[4/3] bg-slate-200 dark:bg-slate-700">
+        <div className="relative aspect-4/3 bg-slate-200 dark:bg-slate-700">
           <AnimatePresence mode="wait">
             <motion.img
               key={currentImage}

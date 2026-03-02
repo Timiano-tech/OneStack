@@ -105,7 +105,7 @@ export function Chat() {
                         </p>
                       </div>
                       {room.unread > 0 && (
-                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-xs font-medium text-white">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-xs font-medium text-white">
                           {room.unread}
                         </span>
                       )}
