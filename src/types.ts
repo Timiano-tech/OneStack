@@ -115,7 +115,7 @@ export interface Review {
 export interface Report {
   id: string;
   reporterId: string;
-  type: 'listing' | 'user' | 'message';
+  type: 'listing' | 'user' | 'message' | 'post' | 'comment';
   targetId: string;
   reason: string;
   description?: string;
@@ -131,3 +131,59 @@ export interface NotificationPayload {
   body?: string;
   data?: Record<string, string>;
 }
+
+// Feed Types
+export type PostCategory = 'Marketplace' | 'Services' | 'Deals' | 'Jobs' | 'Announcements' | 'General';
+
+export interface Post {
+  id: string;
+  userId: string;
+  campusId: string;
+  universityId: string;
+  content: string;
+  images: string[];
+  category: PostCategory;
+  hashtags: string[];
+  visibility: 'campus' | 'university' | 'public';
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  saveCount: number;
+  trendingScore: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  parentCommentId?: string; // For nested replies
+  content: string;
+  likeCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Like {
+  id: string;
+  targetId: string; // postId or commentId
+  targetType: 'post' | 'comment';
+  userId: string;
+  createdAt: string;
+}
+
+export interface Share {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface Save {
+  id: string;
+  postId: string;
+  userId: string;
+  createdAt: string;
+}
+

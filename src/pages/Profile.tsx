@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiStar, FiSettings, FiLogOut, FiZap } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
 import type { User, Listing } from '../types';
+import { toast } from '../components/Toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const MOCK_USER: User = {
   id: 'u1',
@@ -45,11 +47,11 @@ const MOCK_MY_LISTINGS: Listing[] = [
 const MOCK_FAVORITES: Listing[] = [];
 
 export function Profile() {
-  const [user] = useState<User>(MOCK_USER);
+  const { user: authUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
-  const [isLoggedIn] = useState(true); // TODO: from auth
 
-  if (!isLoggedIn) {
+  if (!authUser) {
     return (
       <AnimatedPage className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-900">
         <div className="text-center">
@@ -65,35 +67,51 @@ export function Profile() {
     );
   }
 
+  const displayUser = {
+    ...MOCK_USER,
+    displayName: authUser.displayName || authUser.email?.split('@')[0] || 'User',
+    email: authUser.email,
+    photoURL: authUser.photoURL || '',
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch {
+      toast.error('Failed to log out.');
+    }
+  };
+
   return (
     <AnimatedPage className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <div className="flex items-center gap-4">
             <div className="h-20 w-20 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="" className="h-full w-full object-cover" />
+              {displayUser.photoURL ? (
+                <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
-                  {user.displayName[0]}
+                  {displayUser.displayName[0]}
                 </span>
               )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  {user.displayName}
+                  {displayUser.displayName}
                 </h1>
-                {user.isVerifiedStudent && (
+                {displayUser.isVerifiedStudent && (
                   <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
                     Verified
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{user.email}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{displayUser.email}</p>
               <p className="mt-1 flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
                 <FiStar size={16} />
-                {user.trustScore} seller rating
+                {displayUser.trustScore} seller rating
               </p>
             </div>
             <Link to="/profile/settings">
@@ -193,7 +211,7 @@ export function Profile() {
         </div>
 
         <div className="mt-8">
-          <Button variant="ghost" fullWidth leftIcon={FiLogOut} className="text-red-600">
+          <Button variant="ghost" fullWidth leftIcon={FiLogOut} className="text-red-600" onClick={handleLogout}>
             Sign out
           </Button>
         </div>

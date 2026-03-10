@@ -5,9 +5,10 @@ import { AnimatedPage } from '../../components/AnimatedPage';
 import { Button } from '../../components/Button';
 
 const MOCK_REPORTS = [
-  { id: 'r1', type: 'listing', targetTitle: 'Math Tutoring', reason: 'Spam', description: 'Duplicate post', status: 'pending', createdAt: '2024-02-26' },
-  { id: 'r2', type: 'user', targetTitle: 'User: john@uni.edu', reason: 'Fraud', description: 'Never sent item', status: 'pending', createdAt: '2024-02-25' },
-  { id: 'r3', type: 'listing', targetTitle: 'Old textbook', reason: 'Inappropriate', description: 'Offensive description', status: 'resolved', createdAt: '2024-02-24' },
+  { id: 'r1', type: 'post', targetTitle: 'General Campus Info', reason: 'Spam', description: 'Repeatedly posting the same content', status: 'pending', targetId: 'p123', createdAt: '2024-03-09' },
+  { id: 'r2', type: 'listing', targetTitle: 'Math Tutoring', reason: 'Spam', description: 'Duplicate post', status: 'pending', targetId: 'l1', createdAt: '2024-02-26' },
+  { id: 'r3', type: 'user', targetTitle: 'User: john@uni.edu', reason: 'Fraud', description: 'Never sent item', status: 'pending', targetId: 'u2', createdAt: '2024-02-25' },
+  { id: 'r4', type: 'comment', targetTitle: 'Comment on Post', reason: 'Inappropriate', description: 'Offensive language used', status: 'resolved', targetId: 'c1', createdAt: '2024-02-24' },
 ];
 
 export function Reports() {

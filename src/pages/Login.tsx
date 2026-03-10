@@ -6,6 +6,8 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
+import { getFirebaseAuth } from '../firebase';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 export function Login() {
   const navigate = useNavigate();
@@ -29,12 +31,20 @@ export function Login() {
     if (!validate()) return;
     setLoading(true);
     try {
-      // TODO: Firebase signInWithEmailAndPassword
-      await new Promise((r) => setTimeout(r, 800));
+      const auth = getFirebaseAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      if (!userCredential.user.emailVerified) {
+        await signOut(auth);
+        toast.error('Please verify your email before logging in.');
+        setLoading(false);
+        return;
+      }
+
       toast.success('Welcome back!');
       navigate('/');
-    } catch {
-      toast.error('Invalid email or password.');
+    } catch (error: any) {
+      toast.error(error.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }

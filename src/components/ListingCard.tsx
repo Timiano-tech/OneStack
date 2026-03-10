@@ -28,7 +28,7 @@ export function ListingCard({
     >
       <Link to={`/listing/${listing.id}`} className="block">
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700">
+          <div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-700">
             <img
               src={imageUrl}
               alt={listing.title}

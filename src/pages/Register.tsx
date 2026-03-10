@@ -1,19 +1,27 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiUser, FiPhone } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
+import { getFirebaseAuth } from '../firebase';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 
 const MOCK_UNIVERSITIES = [
-  { id: 'uni1', name: 'University of Demo', country: 'USA', campuses: [{ id: 'c1', name: 'Main Campus', universityId: 'uni1' }, { id: 'c2', name: 'North Campus', universityId: 'uni1' }] },
-  { id: 'uni2', name: 'Tech Institute', country: 'USA', campuses: [{ id: 'c3', name: 'Downtown', universityId: 'uni2' }] },
+  { 
+    id: 'uni1', 
+    name: 'Federal University of Technology Ilaro', 
+    country: 'Nigeria', 
+    campuses: [
+      { id: 'c1', name: 'Campus', universityId: 'uni1' }, 
+      { id: 'c2', name: 'Off Campus', universityId: 'uni1' }
+    ] 
+  }
 ];
 
 export function Register() {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     email: '',
@@ -24,6 +32,7 @@ export function Register() {
     campusId: '',
   });
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const universities = MOCK_UNIVERSITIES;
@@ -62,16 +71,56 @@ export function Register() {
     }
     setLoading(true);
     try {
-      // TODO: Firebase createUserWithEmailAndPassword + Firestore user doc
-      await new Promise((r) => setTimeout(r, 1000));
-      toast.success('Account created! Verify your email to get started.');
-      navigate('/login');
-    } catch {
-      toast.error('Something went wrong. Try again.');
+      const auth = getFirebaseAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      
+      // Update display name
+      await updateProfile(userCredential.user, {
+        displayName: form.displayName
+      });
+      
+      // Send verification email
+      await sendEmailVerification(userCredential.user);
+      
+      // Sign out the user immediately so they must verify and log in
+      await signOut(auth);
+
+      toast.success('Account created! Please check your email to verify.');
+      setIsSuccess(true);
+    } catch (error: any) {
+      toast.error(error.message || 'Something went wrong. Try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <AnimatedPage className="flex min-h-screen flex-col items-center justify-center bg-black px-4 py-12 text-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto w-full max-w-md text-center"
+        >
+          <div className="mb-6 mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+            <FiMail size={40} />
+          </div>
+          <h1 className="text-3xl font-bold">Check your email</h1>
+          <p className="mt-4 text-slate-300">
+            We've sent a verification link to <span className="font-semibold text-white">{form.email}</span>. 
+            Please verify your email address before logging in.
+          </p>
+          <div className="mt-10">
+            <Link to="/login">
+              <Button size="lg" className="w-full sm:w-auto">
+                Go to login
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </AnimatedPage>
+    );
+  }
 
   return (
     <AnimatedPage className="min-h-screen bg-slate-50 px-4 py-12 dark:bg-slate-900">

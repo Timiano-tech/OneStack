@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ToastProvider } from './components/Toast';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppLayout } from './components/AppLayout';
 
 // Main pages
@@ -10,6 +11,7 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Listings } from './pages/Listings';
+import { Feed } from './pages/Feed';
 import { CreateListing } from './pages/CreateListing';
 import { ListingDetail } from './pages/ListingDetail';
 import { Profile } from './pages/Profile';
@@ -28,6 +30,7 @@ import { Analytics } from './pages/Admin/Analytics';
 function AppRoutes() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <AnimatePresence mode="wait">
@@ -42,7 +45,7 @@ function AppRoutes() {
         <Route
           element={
             <AppLayout
-              isAuthenticated={false}
+              isAuthenticated={!!user}
               isAdmin={false}
               menuOpen={menuOpen}
               onMenuToggle={() => setMenuOpen((o) => !o)}
@@ -50,6 +53,7 @@ function AppRoutes() {
           }
         >
           <Route path="/" element={<Home />} />
+          <Route path="/feed" element={<Feed />} />
           <Route path="/listings" element={<Listings />} />
           <Route path="/listing/create" element={<CreateListing />} />
           <Route path="/listing/:id" element={<ListingDetail />} />
@@ -74,10 +78,12 @@ function AppRoutes() {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <ToastProvider />
-        <AppRoutes />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <ToastProvider />
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

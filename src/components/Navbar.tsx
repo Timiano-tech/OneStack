@@ -13,6 +13,7 @@ interface NavbarProps {
 
 const navLinks = [
   { to: '/', label: 'Home', icon: FiGrid },
+  { to: '/feed', label: 'Feed', icon: FiGrid },
   { to: '/listings', label: 'Listings', icon: FiSearch },
   { to: '/chat', label: 'Chat', icon: FiMessageCircle },
   { to: '/profile', label: 'Profile', icon: FiUser },
@@ -31,13 +32,7 @@ export function Navbar({
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 safe-bottom">
       <div className="mx-auto flex h-12 max-w-lg items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
         <Link to="/" className="flex min-w-0 items-center gap-2">
-          <motion.span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#D60000] text-white"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FiGrid size={18} />
-          </motion.span>
+          <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
           <span className="min-w-0 truncate text-base font-bold tracking-tight text-slate-800 dark:text-slate-100 sm:text-lg">
             {SITE.appName}
           </span>

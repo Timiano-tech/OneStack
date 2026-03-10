@@ -4,7 +4,7 @@ import { FiHome, FiGrid, FiPlusCircle, FiMessageCircle, FiUser } from 'react-ico
 
 const tabs = [
   { to: '/', label: 'Home', icon: FiHome },
-  { to: '/listings', label: 'Listings', icon: FiGrid },
+  { to: '/feed', label: 'Feed', icon: FiGrid },
   { to: '/listing/create', label: 'Sell', icon: FiPlusCircle, primary: true },
   { to: '/chat', label: 'Chat', icon: FiMessageCircle },
   { to: '/profile', label: 'Profile', icon: FiUser },
@@ -15,7 +15,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/95 md:hidden"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[28rem] z-50 border-t border-slate-200 bg-white/95 backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/95"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
       <div className="flex items-center justify-around">
