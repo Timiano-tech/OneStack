@@ -26,7 +26,7 @@ export function Navbar({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 safe-bottom">
-      <div className="mx-auto flex h-12 max-w-lg items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
+      <div className="mx-auto flex h-12 w-full items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
           <span className="min-w-0 truncate text-base font-bold tracking-tight text-slate-800 dark:text-slate-100 sm:text-lg">
