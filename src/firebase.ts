@@ -8,12 +8,12 @@ import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getMessaging, type Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAEckGQZOAVcI36Jg0O6QGLAgOdMU7br00",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "onestack-74deb.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "onestack-74deb",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "onestack-74deb.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "866709823340",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:866709823340:web:1d3f492fba13face56dd49",
 };
 
 let app: FirebaseApp | null = null;
