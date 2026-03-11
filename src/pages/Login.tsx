@@ -7,7 +7,8 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
 import { getFirebaseAuth } from '../firebase';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { FcGoogle } from 'react-icons/fc';
 
 export function Login() {
   const navigate = useNavigate();
@@ -45,6 +46,21 @@ export function Login() {
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const auth = getFirebaseAuth();
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      toast.success('Welcome back!');
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message || 'Google sign in failed.');
     } finally {
       setLoading(false);
     }
@@ -94,6 +110,28 @@ export function Login() {
             </div>
             <Button type="submit" fullWidth size="lg" loading={loading}>
               Sign in
+            </Button>
+            
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              size="lg"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="relative"
+            >
+              <FcGoogle className="absolute left-4 h-5 w-5" />
+              Sign in with Google
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">

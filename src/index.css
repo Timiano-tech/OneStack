@@ -53,14 +53,20 @@ body {
 
 #root {
   width: 100%;
-  max-width: 28rem; /* 448px, equivalent to max-w-md */
   min-height: 100dvh;
   background: rgb(var(--color-surface));
   position: relative;
   overflow-x: hidden;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  #root {
+    max-width: 28rem; /* 448px */
+    margin: 0 auto;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
 }
 
 /* Low bandwidth: reduce motion when preferred */

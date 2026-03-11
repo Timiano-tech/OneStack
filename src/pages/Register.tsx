@@ -7,7 +7,8 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
 import { getFirebaseAuth } from '../firebase';
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { FcGoogle } from 'react-icons/fc';
 
 const MOCK_UNIVERSITIES = [
   { 
@@ -94,6 +95,32 @@ export function Register() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const auth = getFirebaseAuth();
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // If we want to assign a default name if they don't have one
+      if (!userCredential.user.displayName && form.displayName) {
+         await updateProfile(userCredential.user, { displayName: form.displayName });
+      }
+
+      toast.success('Google sign in successful!');
+      // Assuming Google login implies verification
+      // But we still need them to complete the university/campus step ideally
+      // For now, let's just complete step 1 and move them to step 2 if they logged in with Google but we need University info
+      if (step === 1) {
+         setStep(2);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Google sign in failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (isSuccess) {
     return (
       <AnimatedPage className="flex min-h-screen flex-col items-center justify-center bg-black px-4 py-12 text-white">
@@ -148,7 +175,7 @@ export function Register() {
           </p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {step === 1 && (
-              <>
+              <div className="space-y-4">
                 <Input
                   label="Email"
                   type="email"
@@ -184,8 +211,31 @@ export function Register() {
                   leftIcon={FiLock}
                   error={errors.password}
                 />
-              </>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white px-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Or continue with</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  fullWidth
+                  size="lg"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="relative"
+                >
+                  <FcGoogle className="absolute left-4 h-5 w-5" />
+                  Sign in with Google
+                </Button>
+              </div>
             )}
+            
             {step === 2 && (
               <>
                 <div>
@@ -241,6 +291,33 @@ export function Register() {
                 {step === 1 ? 'Continue' : 'Create account'}
               </Button>
             </div>
+            
+            {step === 1 && (
+              <>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white px-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Or continue with</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  fullWidth
+                  size="lg"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="relative"
+                >
+                  <FcGoogle className="absolute left-4 h-5 w-5" />
+                  Sign in with Google
+                </Button>
+              </>
+            )}
+            
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
             Already have an account?{' '}

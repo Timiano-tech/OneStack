@@ -8,13 +8,9 @@ const HIDE_NAV_ROUTES = ['/login', '/register', '/forgot-password', '/pricing'];
 export function AppLayout({
   isAuthenticated = false,
   isAdmin = false,
-  menuOpen,
-  onMenuToggle,
 }: {
   isAuthenticated?: boolean;
   isAdmin?: boolean;
-  menuOpen: boolean;
-  onMenuToggle: () => void;
 }) {
   const location = useLocation();
   const pathname = location.pathname;
@@ -29,8 +25,6 @@ export function AppLayout({
         <Navbar
           isAuthenticated={isAuthenticated}
           isAdmin={isAdmin}
-          menuOpen={menuOpen}
-          onMenuToggle={onMenuToggle}
         />
       )}
       <main

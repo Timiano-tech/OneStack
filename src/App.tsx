@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ToastProvider } from './components/Toast';
@@ -29,7 +29,6 @@ import { Analytics } from './pages/Admin/Analytics';
 
 function AppRoutes() {
   const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -47,8 +46,6 @@ function AppRoutes() {
             <AppLayout
               isAuthenticated={!!user}
               isAdmin={false}
-              menuOpen={menuOpen}
-              onMenuToggle={() => setMenuOpen((o) => !o)}
             />
           }
         >

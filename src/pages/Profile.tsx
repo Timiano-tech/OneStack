@@ -8,6 +8,7 @@ import { ListingCard } from '../components/ListingCard';
 import type { User, Listing } from '../types';
 import { toast } from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
+import { syncUserToFirestore, updateUserProfileImage } from '../services/userService';
 
 const MOCK_USER: User = {
   id: 'u1',
@@ -50,6 +51,17 @@ export function Profile() {
   const { user: authUser, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
+  const [dbUser, setDbUser] = useState<User | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Sync with Firestore whenever user loads
+  useState(() => {
+    if (authUser) {
+      syncUserToFirestore(authUser).then(user => {
+         setDbUser(user);
+      }).catch(console.error);
+    }
+  });
 
   if (!authUser) {
     return (
@@ -69,9 +81,32 @@ export function Profile() {
 
   const displayUser = {
     ...MOCK_USER,
+    ...dbUser,
     displayName: authUser.displayName || authUser.email?.split('@')[0] || 'User',
     email: authUser.email,
-    photoURL: authUser.photoURL || '',
+    photoURL: dbUser?.photoURL || authUser.photoURL || '',
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image is too large (max 5MB)');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const url = await updateUserProfileImage(authUser, file);
+      setDbUser(prev => prev ? { ...prev, photoURL: url } : null);
+      toast.success('Profile picture updated!');
+    } catch (error: any) {
+      toast.error('Failed to upload image. ' + error.message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -88,16 +123,39 @@ export function Profile() {
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <div className="flex items-center gap-4">
-            <div className="h-20 w-20 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-              {displayUser.photoURL ? (
-                <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
-                  {displayUser.displayName[0]}
-                </span>
-              )}
+            <div className="relative h-20 w-20 shrink-0">
+               <div className="h-full w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                 {uploadingImage ? (
+                   <span className="flex h-full w-full items-center justify-center text-xs font-medium text-slate-500">
+                     ...
+                   </span>
+                 ) : displayUser.photoURL ? (
+                   <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
+                 ) : (
+                   <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
+                     {displayUser.displayName?.[0]}
+                   </span>
+                 )}
+               </div>
+               
+               <label
+                  htmlFor="profile-upload"
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-100 text-slate-600 shadow-sm transition-colors hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                  aria-label="Upload profile picture"
+               >
+                 <FiSettings size={14} className="opacity-0 absolute" />
+                 <span className="text-xl leading-none -mt-1">+</span>
+                 <input
+                   id="profile-upload"
+                   type="file"
+                   accept="image/jpeg,image/png,image/webp"
+                   className="hidden"
+                   onChange={handleImageUpload}
+                   disabled={uploadingImage}
+                 />
+               </label>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                   {displayUser.displayName}
