@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { FiHeart, FiMessageCircle, FiShare2, FiBookmark, FiMoreHorizontal, FiShield } from 'react-icons/fi';
 import { formatDistanceToNow } from '../../utils/dateUtils';
 import type { Post } from '../../types';
-import { useAuth } from '../../hooks/useAuth';
-import { toggleLike, toggleSavePost } from '../../services/feedService';
 import { toast } from '../Toast';
 
 interface PostCardProps {

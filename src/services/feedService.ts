@@ -27,7 +27,6 @@ const SAVES_COL = 'saves';
 const REPORTS_COL = 'reports';
 
 const POSTS_PER_PAGE = 10;
-const COMMENTS_PER_PAGE = 20;
 
 /** Use canvas to compress image before upload */
 export async function compressImage(file: File, maxWidth = 1080): Promise<Blob> {
@@ -148,7 +147,7 @@ export async function getFeedPosts({
   q = query(q, ...constraints);
   
   const snapshot = await getDocs(q);
-  const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Post));
+  const posts = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as object) } as Post));
   return {
     posts,
     lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
@@ -198,7 +197,6 @@ export async function toggleSave(postId: string, userId: string): Promise<boolea
   const db = getFirebaseDb();
   const saveId = `${postId}_${userId}`;
   const saveRef = doc(db, SAVES_COL, saveId);
-  const postRef = doc(db, POSTS_COL, postId);
 
   const saveSnap = await getDoc(saveRef);
   if (!saveSnap.exists()) {
@@ -277,7 +275,7 @@ export async function getComments(postId: string) {
   return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
 }
 
-export async function deletePost(postId: string, userId: string) {
+export async function deletePost(postId: string, _userId: string) {
   const db = getFirebaseDb();
   // We'd ideally verify ownership. Using rule enforcement or checking doc directly.
   await deleteDoc(doc(db, POSTS_COL, postId));
