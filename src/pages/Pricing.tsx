@@ -92,7 +92,7 @@ export function Pricing() {
             <ul className="mt-4 space-y-2">
               {PLANS.premium.features.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                  <FiCheck className="shrink-0 text-emerald-500" size={18} />
+                  <FiCheck className="shrink-0 text-emerald-400" size={18} />
                   {f}
                 </li>
               ))}
