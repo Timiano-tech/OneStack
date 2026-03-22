@@ -26,9 +26,9 @@ export function ListingCard({
       transition={{ delay: index * 0.05, duration: 0.25 }}
       className="group"
     >
-      <Link to={`/listing/${listing.id}`} className="block">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-700">
+      <Link to={`/listing/${listing.id}`} className="block h-full">
+        <div className="h-full flex flex-col overflow-hidden rounded-2xl glass transition-all duration-300 hover:-translate-y-1 hover:shadow-glow group-hover:border-blue-400/50 dark:group-hover:border-blue-500/50">
+          <div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-800/50 overflow-hidden">
             <img
               src={imageUrl}
               alt={listing.title}
@@ -63,11 +63,11 @@ export function ListingCard({
               </button>
             )}
           </div>
-          <div className="p-3">
-            <h3 className="line-clamp-2 font-semibold text-slate-800 dark:text-slate-100">
+          <div className="p-4 flex flex-col flex-grow">
+            <h3 className="line-clamp-2 font-semibold text-slate-800 dark:text-slate-100 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
               {listing.title}
             </h3>
-            <p className="mt-1 text-lg font-bold text-emerald-600 dark:text-emerald-400">
+            <p className="mt-2 text-lg font-bold text-gradient">
               {listing.currency} {listing.price.toLocaleString()}
             </p>
             {listing.location && (

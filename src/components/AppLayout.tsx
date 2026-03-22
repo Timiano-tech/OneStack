@@ -27,19 +27,19 @@ export function AppLayout({
           isAdmin={isAdmin}
         />
       )}
-      <main
-        className={`min-h-screen bg-slate-50 dark:bg-slate-900 ${
-          showBottomNav ? 'pb-20 md:pb-0' : ''
-        } ${showNav ? 'pt-14 sm:pt-16' : ''}`}
-        style={
-          showBottomNav
-            ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }
-            : undefined
-        }
-      >
-        <Outlet />
-      </main>
-      {showNav && showBottomNav && <BottomNav />}
-    </>
-  );
+        <main
+          className={`min-h-screen ${
+            showBottomNav ? 'pb-20 md:pb-0' : ''
+          } ${showNav ? 'pt-14 sm:pt-16' : ''}`}
+          style={
+            showBottomNav
+              ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }
+              : undefined
+          }
+        >
+          <Outlet />
+        </main>
+        {showNav && showBottomNav && <BottomNav />}
+      </>
+    );
 }

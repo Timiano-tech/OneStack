@@ -25,7 +25,7 @@ export function Navbar({
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 safe-bottom">
+    <header className="sticky top-0 z-40 glass safe-bottom">
       <div className="mx-auto flex h-12 w-full items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
@@ -45,7 +45,7 @@ export function Navbar({
                 <motion.span
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     active
-                      ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                   }`}
                   whileHover={{ scale: 1.02 }}
@@ -103,7 +103,7 @@ export function Navbar({
           {isAuthenticated ? (
             <Link to="/listing/create">
               <motion.span
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D60000] text-white shadow-sm hover:bg-[#b00000]"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium text-white shadow-glow hover:opacity-90 transition-opacity"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -123,7 +123,7 @@ export function Navbar({
               </Link>
               <Link to="/register" className="hidden sm:block">
                 <motion.span
-                  className="flex items-center rounded-xl bg-[#D60000] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#b00000]"
+                  className="flex items-center rounded-xl bg-gradient-premium px-3 py-2 text-sm font-medium text-white shadow-glow hover:opacity-90 transition-opacity"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

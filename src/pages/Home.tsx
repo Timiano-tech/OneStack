@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiSearch, FiPlus, FiShield, FiTrendingUp, FiMessageCircle } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiShield, FiTrendingUp, FiMessageCircle, FiZap } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
@@ -76,87 +76,108 @@ const categories = [
 
 export function Home() {
   return (
-    <AnimatedPage className="bg-slate-50 dark:bg-slate-900">
+    <AnimatedPage className="">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-[#D60000] to-black/50 px-4 py-8 text-white sm:py-12">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60" />
-        <div className="relative mx-auto max-w-lg sm:max-w-7xl">
-          <p className="text-sm font-medium text-red-100">{SITE.campus.shortName}</p>
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl"
-          >
-            Your campus marketplace.
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.08 }}
-            className="mt-2 max-w-md text-sm text-red-50 sm:text-base"
-          >
-            Buy, sell, and trade with verified FUT Ilaro students. Items, services & more—all in one app.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.12 }}
-            className="mt-5 flex flex-wrap gap-2"
-          >
-            <Link to="/listings">
-              <Button
-                size="md"
-                variant="secondary"
-                className="bg-white text-[#D60000] hover:bg-red-50"
-                leftIcon={FiSearch}
-              >
-                Browse
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button size="md" variant="outline" className="border-white text-white hover:bg-white/10" leftIcon={FiPlus}>
-                Get started
-              </Button>
-            </Link>
-            <Link to="/pricing">
-              <Button size="md" variant="ghost" className="text-white hover:bg-white/10">
-                Premium
-              </Button>
-            </Link>
-          </motion.div>
+      <section className="relative overflow-hidden px-4 py-8 sm:py-16">
+        <div className="absolute inset-0 bg-gradient-premium opacity-10 dark:opacity-20 blur-3xl -z-10 rounded-full w-3/4 h-3/4 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="relative mx-auto max-w-lg sm:max-w-7xl glass rounded-3xl p-8 sm:p-12 border border-white/20 dark:border-slate-700/50 shadow-glass overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+          
+          <div className="relative z-10 max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/50 px-3 py-1 text-sm font-medium text-blue-700 backdrop-blur-md dark:border-blue-800/50 dark:bg-blue-900/30 dark:text-blue-300 mb-6"
+            >
+              <FiZap className="h-4 w-4" />
+              <span>{SITE.campus.shortName} Exclusive</span>
+            </motion.div>
+            
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl text-slate-900 dark:text-white"
+            >
+              Your campus <span className="text-gradient">marketplace.</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="mt-4 max-w-lg text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed"
+            >
+              Buy, sell, and trade with verified FUT Ilaro students. Items, services, and more—all in one premium app.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className="mt-8 flex flex-wrap gap-4"
+            >
+              <Link to="/listings">
+                <Button
+                  size="lg"
+                  className="bg-gradient-premium border-0 text-white shadow-glow hover:scale-105 transition-transform"
+                  leftIcon={FiSearch}
+                >
+                  Browse Now
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="glass text-slate-800 dark:text-white border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" 
+                  leftIcon={FiPlus}
+                >
+                  Get started
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Trust badges */}
-      <section className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-800/50">
-        <div className="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-6 text-slate-600 dark:text-slate-400 sm:max-w-7xl sm:gap-8">
+      <section className="px-4 py-4 sm:py-6 relative z-10 -mt-8 sm:-mt-12">
+        <div className="mx-auto max-w-lg sm:max-w-4xl glass rounded-2xl flex flex-wrap items-center justify-center gap-6 text-slate-700 dark:text-slate-300 py-5 sm:gap-12 shadow-soft">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2.5"
           >
-            <FiShield className="text-[#D60000]" size={20} />
-            <span className="text-xs font-medium sm:text-sm">FUT Ilaro students only</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+              <FiShield size={20} />
+            </div>
+            <span className="text-sm font-semibold">FUT Ilaro students only</span>
           </motion.div>
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-2.5"
           >
-            <FiMessageCircle className="text-[#D60000]" size={20} />
-            <span className="text-xs font-medium sm:text-sm">In-app chat</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+              <FiMessageCircle size={20} />
+            </div>
+            <span className="text-sm font-semibold">In-app chat</span>
           </motion.div>
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-2.5"
           >
-            <FiTrendingUp className="text-[#D60000]" size={20} />
-            <span className="text-xs font-medium sm:text-sm">Premium boosts</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400">
+              <FiTrendingUp size={20} />
+            </div>
+            <span className="text-sm font-semibold">Premium boosts</span>
           </motion.div>
         </div>
       </section>
@@ -171,11 +192,11 @@ export function Home() {
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, margin: "-50px" }}
                   transition={{ delay: i * 0.05 }}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-emerald-800"
+                  className="rounded-2xl glass p-5 transition-all hover:-translate-y-1 hover:shadow-glow hover:border-blue-400 dark:hover:border-blue-500 group"
                 >
-                  <span className="font-medium text-slate-800 dark:text-slate-100">{cat.name}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{cat.name}</span>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{cat.count} listings</p>
                 </motion.div>
               </Link>
@@ -191,9 +212,9 @@ export function Home() {
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Featured</h2>
             <Link
               to="/listings"
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+              className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
             >
-              View all
+              View all &rarr;
             </Link>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
