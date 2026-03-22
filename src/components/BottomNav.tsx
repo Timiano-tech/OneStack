@@ -15,7 +15,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 glass md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 shadow-[0_-4px_25px_-5px_rgba(0,0,0,0.05)] dark:bg-[#09090b] dark:border-slate-800/80 md:hidden"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
       <div className="flex items-center justify-around">
@@ -32,7 +32,7 @@ export function BottomNav() {
             >
               {primary ? (
                 <motion.span
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-premium text-white shadow-glow"
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-soft"
                   whileTap={{ scale: 0.92 }}
                 >
                   <Icon size={24} />
@@ -41,7 +41,7 @@ export function BottomNav() {
                 <span
                   className={`flex items-center justify-center rounded-xl p-2 transition-colors ${
                     active
-                      ? 'text-blue-600 dark:text-blue-400'
+                      ? 'text-accent dark:text-red-400'
                       : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
@@ -50,7 +50,7 @@ export function BottomNav() {
               )}
               <span
                 className={`text-[10px] font-medium ${
-                  active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+                  active ? 'text-accent dark:text-red-400' : 'text-slate-500 dark:text-slate-400'
                 } ${primary ? 'mt-0' : ''}`}
               >
                 {label}

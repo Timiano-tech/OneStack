@@ -27,7 +27,7 @@ export function ListingCard({
       className="group"
     >
       <Link to={`/listing/${listing.id}`} className="block h-full">
-        <div className="h-full flex flex-col overflow-hidden rounded-2xl glass transition-all duration-300 hover:-translate-y-1 hover:shadow-glow group-hover:border-blue-400/50 dark:group-hover:border-blue-500/50">
+        <div className="h-full flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#121214] border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 group-hover:border-blue-200 dark:group-hover:border-blue-900/50">
           <div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-800/50 overflow-hidden">
             <img
               src={imageUrl}
@@ -53,7 +53,7 @@ export function ListingCard({
                   e.preventDefault();
                   onFavoriteToggle(listing.id);
                 }}
-                className="absolute right-2 bottom-2 rounded-full bg-white/90 p-2 shadow-md backdrop-blur-sm transition hover:bg-white dark:bg-slate-800/90 dark:hover:bg-slate-700"
+                  className="absolute right-3 bottom-3 rounded-full bg-white/95 p-2.5 shadow-md backdrop-blur-md transition hover:scale-110 active:scale-95 text-slate-400 hover:text-red-500 dark:bg-[#09090b]/90 dark:hover:bg-[#121214]"
                 aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <FiHeart

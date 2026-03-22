@@ -25,7 +25,7 @@ export function Navbar({
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 glass safe-bottom">
+    <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-100 dark:bg-[#09090b]/95 dark:border-slate-800/80 shadow-sm backdrop-blur-md safe-bottom">
       <div className="mx-auto flex h-12 w-full items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
@@ -45,7 +45,7 @@ export function Navbar({
                 <motion.span
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     active
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                   }`}
                   whileHover={{ scale: 1.02 }}
@@ -103,7 +103,7 @@ export function Navbar({
           {isAuthenticated ? (
             <Link to="/listing/create">
               <motion.span
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-premium text-white shadow-glow hover:opacity-90 transition-opacity"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white shadow-soft hover:-translate-y-0.5 transition-transform"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -123,10 +123,9 @@ export function Navbar({
               </Link>
               <Link to="/register" className="hidden sm:block">
                 <motion.span
-                  className="flex items-center rounded-xl bg-gradient-premium px-3 py-2 text-sm font-medium text-white shadow-glow hover:opacity-90 transition-opacity"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-soft hover:-translate-y-0.5 transition-transform"
                 >
+                  Register
                 </motion.span>
               </Link>
             </>

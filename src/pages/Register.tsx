@@ -292,31 +292,7 @@ export function Register() {
               </Button>
             </div>
             
-            {step === 1 && (
-              <>
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">Or continue with</span>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  fullWidth
-                  size="lg"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="relative"
-                >
-                  <FcGoogle className="absolute left-4 h-5 w-5" />
-                  Sign in with Google
-                </Button>
-              </>
-            )}
+            {/* Duplicate Google login removed */}
             
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
