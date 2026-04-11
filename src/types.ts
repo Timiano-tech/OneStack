@@ -76,23 +76,22 @@ export interface Listing {
   favoriteCount?: number;
 }
 
-export interface ChatRoom {
+export interface Conversation {
   id: string;
-  listingId: string;
-  buyerId: string;
-  sellerId: string;
+  participants: string[]; // User UUIDs
+  listingId?: string;
   lastMessage?: string;
-  lastMessageAt?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Message {
   id: string;
-  roomId: string;
+  conversationId: string;
   senderId: string;
-  text: string;
+  content: string;
   createdAt: string;
-  read: boolean;
+  readAt?: string; // ISO string if read
 }
 
 export interface Favorite {
