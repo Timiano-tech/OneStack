@@ -1,4 +1,6 @@
-import { Outlet, useLocation } from 'react-router-dom';
+"use client";
+
+import { usePathname } from 'next/navigation';
 import { Navbar } from './Navbar';
 import { BottomNav } from './BottomNav';
 
@@ -6,18 +8,19 @@ const BOTTOM_NAV_ROUTES = ['/', '/listings', '/listing/create', '/chat', '/profi
 const HIDE_NAV_ROUTES = ['/login', '/register', '/forgot-password', '/pricing'];
 
 export function AppLayout({
+  children,
   isAuthenticated = false,
   isAdmin = false,
 }: {
+  children: React.ReactNode;
   isAuthenticated?: boolean;
   isAdmin?: boolean;
 }) {
-  const location = useLocation();
-  const pathname = location.pathname;
+  const pathname = usePathname() || '/';
   const showBottomNav = BOTTOM_NAV_ROUTES.some(
     (r) => r === pathname || (r !== '/' && pathname.startsWith(r))
   );
-  const showNav = !HIDE_NAV_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '?'));
+  const showNav = !HIDE_NAV_ROUTES.some((r) => pathname === r || pathname.startsWith(r));
 
   return (
     <>
@@ -27,19 +30,19 @@ export function AppLayout({
           isAdmin={isAdmin}
         />
       )}
-        <main
-          className={`min-h-screen ${
-            showBottomNav ? 'pb-20 md:pb-0' : ''
-          } ${showNav ? 'pt-14 sm:pt-16' : ''}`}
-          style={
-            showBottomNav
-              ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }
-              : undefined
-          }
-        >
-          <Outlet />
-        </main>
-        {showNav && showBottomNav && <BottomNav />}
-      </>
-    );
+      <main
+        className={`min-h-screen ${
+          showBottomNav ? 'pb-20 md:pb-0' : ''
+        } ${showNav ? 'pt-14 sm:pt-16' : ''}`}
+        style={
+          showBottomNav
+            ? { paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }
+            : undefined
+        }
+      >
+        {children}
+      </main>
+      {showNav && showBottomNav && <BottomNav />}
+    </>
+  );
 }

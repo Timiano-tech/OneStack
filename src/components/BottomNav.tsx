@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiHome, FiGrid, FiPlusCircle, FiMessageCircle, FiUser } from 'react-icons/fi';
 
@@ -11,7 +12,7 @@ const tabs = [
 ];
 
 export function BottomNav() {
-  const location = useLocation();
+  const pathname = usePathname();
 
   return (
     <nav
@@ -22,12 +23,12 @@ export function BottomNav() {
         {tabs.map(({ to, label, icon: Icon, primary }) => {
           const active =
             to === '/'
-              ? location.pathname === '/'
-              : location.pathname === to || location.pathname.startsWith(to + '/');
+              ? pathname === '/'
+              : pathname === to || pathname?.startsWith(to + '/');
           return (
             <Link
               key={to}
-              to={to}
+              href={to}
               className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2 pt-3 text-center"
             >
               {primary ? (

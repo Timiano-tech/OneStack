@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { FiHeart, FiMessageCircle, FiShare2, FiBookmark, FiMoreHorizontal, FiShield } from 'react-icons/fi';
 import { formatDistanceToNow } from '../../utils/dateUtils';
 import type { Post } from '../../types';
@@ -69,7 +69,7 @@ export function PostCard({ post, authorsMap, onLikeChange, onSaveChange }: PostC
     <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-3">
-        <Link to={`/profile/${post.userId}`} className="flex items-center gap-3">
+        <Link href={`/profile/${post.userId}`} className="flex items-center gap-3">
           <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             {author.photoURL ? (
               <img src={author.photoURL} alt={author.displayName} className="h-full w-full object-cover" />
@@ -167,7 +167,7 @@ export function PostCard({ post, authorsMap, onLikeChange, onSaveChange }: PostC
           </button>
           
           <Link
-            to={`/feed/post/${post.id}`}
+            href={`/feed/post/${post.id}`}
             className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <FiMessageCircle size={20} />

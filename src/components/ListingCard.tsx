@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiHeart, FiMapPin } from 'react-icons/fi';
 import type { Listing } from '../types';
@@ -26,7 +26,7 @@ export function ListingCard({
       transition={{ delay: index * 0.05, duration: 0.25 }}
       className="group"
     >
-      <Link to={`/listing/${listing.id}`} className="block h-full">
+      <Link href={`/listing/${listing.id}`} className="block h-full">
         <div className="h-full flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#121214] border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 group-hover:border-blue-200 dark:group-hover:border-blue-900/50">
           <div className="relative aspect-4/3 bg-slate-100 dark:bg-slate-800/50 overflow-hidden">
             <img

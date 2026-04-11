@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiSearch, FiPlus, FiUser, FiMessageCircle, FiGrid, FiSun, FiMoon, FiZap } from 'react-icons/fi';
 import { useTheme } from '../contexts/ThemeContext';
@@ -21,13 +22,13 @@ export function Navbar({
   isAuthenticated = false,
   isAdmin = false,
 }: NavbarProps) {
-  const location = useLocation();
+  const pathname = usePathname() || '/';
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-100 dark:bg-[#09090b]/95 dark:border-slate-800/80 shadow-sm backdrop-blur-md safe-bottom">
       <div className="mx-auto flex h-12 w-full items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
-        <Link to="/" className="flex min-w-0 items-center gap-2">
+        <Link href="/" className="flex min-w-0 items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
           <span className="min-w-0 truncate text-base font-bold tracking-tight text-slate-800 dark:text-slate-100 sm:text-lg">
             {SITE.appName}
@@ -39,9 +40,9 @@ export function Navbar({
 
         <nav className="hidden items-center gap-1 sm:flex">
           {navLinks.map(({ to, label, icon: Icon }) => {
-            const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+            const active = pathname === to || (to !== '/' && pathname.startsWith(to));
             return (
-              <Link key={to} to={to}>
+              <Link key={to} href={to}>
                 <motion.span
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     active
@@ -57,7 +58,7 @@ export function Navbar({
               </Link>
             );
           })}
-          <Link to="/pricing" className="hidden sm:block">
+          <Link href="/pricing" className="hidden sm:block">
             <motion.span
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20"
               whileHover={{ scale: 1.02 }}
@@ -68,7 +69,7 @@ export function Navbar({
             </motion.span>
           </Link>
           {isAdmin && (
-            <Link to="/admin">
+            <Link href="/admin">
               <motion.span
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20"
                 whileHover={{ scale: 1.02 }}
@@ -91,7 +92,7 @@ export function Navbar({
             {theme === 'dark' ? <FiSun size={20} /> : <FiMoon size={20} />}
           </button>
           
-          <Link to="/pricing" className="sm:hidden">
+          <Link href="/pricing" className="sm:hidden">
             <motion.span
               className="flex items-center justify-center rounded-xl bg-amber-100 p-2 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
               whileHover={{ scale: 1.05 }}
@@ -101,7 +102,7 @@ export function Navbar({
             </motion.span>
           </Link>
           {isAuthenticated ? (
-            <Link to="/listing/create">
+            <Link href="/listing/create">
               <motion.span
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white shadow-soft hover:-translate-y-0.5 transition-transform"
                 whileHover={{ scale: 1.05 }}
@@ -112,7 +113,7 @@ export function Navbar({
             </Link>
           ) : (
             <>
-              <Link to="/login" className="hidden sm:block">
+              <Link href="/login" className="hidden sm:block">
                 <motion.span
                   className="flex items-center rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   whileHover={{ scale: 1.02 }}
@@ -121,7 +122,7 @@ export function Navbar({
                   Log in
                 </motion.span>
               </Link>
-              <Link to="/register" className="hidden sm:block">
+              <Link href="/register" className="hidden sm:block">
                 <motion.span
                   className="flex items-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-soft hover:-translate-y-0.5 transition-transform"
                 >
