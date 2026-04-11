@@ -1,8 +1,13 @@
-# OneStack – Firebase Build Spec
+# ~~OneStack – Firebase Build Spec~~ [DEPRECATED]
 
-Everything you need to configure and build in Firebase for the campus marketplace.
+> ⚠️ **This document is outdated.** OneStack has been migrated from Firebase to **Supabase + Next.js**.
+> 
+> The current technical specification is in **[BUILD_SPEC.md](./BUILD_SPEC.md)**.
+>
+> This file is kept for historical reference only. Do not use it for new development.
 
 ---
+
 
 ## 1. Firebase project setup
 
