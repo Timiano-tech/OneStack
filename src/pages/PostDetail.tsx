@@ -4,9 +4,8 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { PostCard } from '../components/Feed/PostCard';
 import { CommentItem } from '../components/Feed/CommentItem';
-import { useAuth } from '../hooks/useAuth';
-import { getFirebaseDb } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { getComments, addComment } from '../services/feedService';
 import { Button } from '../components/Button';
 import { toast } from '../components/Toast';
@@ -31,10 +30,33 @@ export function PostDetail() {
   const fetchPostAndComments = useCallback(async () => {
     if (!id) return;
     try {
-      const db = getFirebaseDb();
-      const postSnap = await getDoc(doc(db, 'posts', id));
-      if (postSnap.exists()) {
-        setPost({ id: postSnap.id, ...postSnap.data() } as Post);
+      const { data: postData, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (postData) {
+        setPost({
+          id: postData.id,
+          userId: postData.user_id,
+          campusId: postData.campus_id,
+          universityId: postData.university_id,
+          content: postData.content,
+          images: postData.images,
+          category: postData.category,
+          hashtags: postData.hashtags,
+          visibility: postData.visibility,
+          likeCount: postData.like_count,
+          commentCount: postData.comment_count,
+          shareCount: postData.share_count,
+          saveCount: postData.save_count,
+          trendingScore: postData.trending_score,
+          createdAt: postData.created_at,
+          updatedAt: postData.updated_at,
+        } as Post);
         const fetchedComments = await getComments(id);
         setComments(fetchedComments);
       } else {
@@ -58,7 +80,7 @@ export function PostDetail() {
     if (!newComment.trim() || !user || !id) return;
     setAddingComment(true);
     try {
-      await addComment(id, user.uid, newComment.trim());
+      await addComment(id, user.id, newComment.trim());
       setNewComment('');
       fetchPostAndComments(); // Refresh comments
       toast.success('Comment added');
@@ -144,11 +166,11 @@ export function PostDetail() {
           <div className="border-t border-slate-100 p-4 pb-4 dark:border-slate-700/50">
             <form onSubmit={handleAddComment} className="flex gap-3">
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="You" className="h-full w-full object-cover" />
+                {user?.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="You" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center font-bold text-slate-500">
-                    {user?.displayName?.charAt(0).toUpperCase() || '?'}
+                    {user?.user_metadata?.display_name?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
               </div>

@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from 'firebase/auth';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirebaseAuth } from '../firebase';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
+import type { User as UserProfile } from '../types';
 
 interface AuthContextType {
-  user: User | null;
+  user: (User & UserProfile) | null;
   loading: boolean;
   logout: () => Promise<void>;
 }
@@ -18,22 +18,62 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<(User & UserProfile) | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async (supabaseUser: User) => {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', supabaseUser.id)
+      .single();
+
+    if (profile) {
+      // Map snake_case from DB to camelCase for the app
+      const mappedProfile: UserProfile = {
+        id: profile.id,
+        email: profile.email,
+        displayName: profile.display_name,
+        photoURL: profile.photo_url,
+        universityId: profile.university_id,
+        campusId: profile.campus_id,
+        isVerifiedStudent: profile.is_verified_student,
+        trustScore: profile.trust_score,
+        createdAt: profile.created_at,
+        role: profile.role,
+      };
+      setUser({ ...supabaseUser, ...mappedProfile });
+    } else {
+      setUser(supabaseUser as any);
+    }
+  };
+
   useEffect(() => {
-    const auth = getFirebaseAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user).then(() => setLoading(false));
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await fetchProfile(session.user);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const logout = async () => {
-    const auth = getFirebaseAuth();
-    await signOut(auth);
+    await supabase.auth.signOut();
   };
 
   return (

@@ -20,7 +20,7 @@ export function ListingCard({
   const isService = listing.type === 'service';
 
   return (
-    <motion.article
+    <motion.article 
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.25 }}

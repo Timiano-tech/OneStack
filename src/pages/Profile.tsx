@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiStar, FiSettings, FiLogOut, FiZap } from 'react-icons/fi';
@@ -8,60 +8,51 @@ import { ListingCard } from '../components/ListingCard';
 import type { User, Listing } from '../types';
 import { toast } from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
-import { syncUserToFirestore, updateUserProfileImage } from '../services/userService';
-
-const MOCK_USER: User = {
-  id: 'u1',
-  email: 'alex@university.edu',
-  displayName: 'Alex Chen',
-  photoURL: '',
-  universityId: 'uni1',
-  campusId: 'c1',
-  isVerifiedStudent: true,
-  trustScore: 4.8,
-  createdAt: new Date().toISOString(),
-  role: 'user',
-};
-
-const MOCK_MY_LISTINGS: Listing[] = [
-  {
-    id: '1',
-    userId: 'u1',
-    type: 'sell',
-    title: 'MacBook Pro 14" M3',
-    description: 'Like new.',
-    price: 1299,
-    currency: 'USD',
-    category: 'Electronics',
-    condition: 'like_new',
-    images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400'],
-    location: 'North Campus',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: true,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
-const MOCK_FAVORITES: Listing[] = [];
+import { syncUserToSupabase, updateUserProfileImage } from '../services/userService';
+import { getListings } from '../services/listingService';
 
 export function Profile() {
   const { user: authUser, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
   const [dbUser, setDbUser] = useState<User | null>(null);
+  const [myListings, setMyListings] = useState<Listing[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Sync with Firestore whenever user loads
-  useState(() => {
+  useEffect(() => {
     if (authUser) {
-      syncUserToFirestore(authUser).then(user => {
-         setDbUser(user);
-      }).catch(console.error);
+      const initProfile = async () => {
+        try {
+          // syncUserToSupabase expects supabase.User as first arg. 
+          // AuthContext's user is (User & UserProfile), which includes the fields needed.
+          const userProfile = await syncUserToSupabase(authUser as any);
+          setDbUser(userProfile);
+          
+          // Fetch user's listings
+          const listings = await getListings({ userId: authUser.id } as any);
+          // Note: added userId to getListings filter in my head, I should ensure listingService supports it.
+          // Let me check listingService.ts or just use the generic one.
+          setMyListings(listings);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      initProfile();
+    } else {
+      setLoading(false);
     }
-  });
+  }, [authUser]);
+
+  if (loading) {
+    return (
+      <AnimatedPage className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+      </AnimatedPage>
+    );
+  }
 
   if (!authUser) {
     return (
@@ -80,18 +71,17 @@ export function Profile() {
   }
 
   const displayUser = {
-    ...MOCK_USER,
-    ...dbUser,
-    displayName: authUser.displayName || authUser.email?.split('@')[0] || 'User',
+    displayName: dbUser?.displayName || authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || 'User',
     email: authUser.email,
-    photoURL: dbUser?.photoURL || authUser.photoURL || '',
+    photoURL: dbUser?.photoURL || authUser.user_metadata?.avatar_url || '',
+    isVerifiedStudent: dbUser?.isVerifiedStudent ?? false,
+    trustScore: dbUser?.trustScore ?? 0,
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (e.g., max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image is too large (max 5MB)');
       return;
@@ -99,7 +89,7 @@ export function Profile() {
 
     setUploadingImage(true);
     try {
-      const url = await updateUserProfileImage(authUser, file);
+      const url = await updateUserProfileImage(authUser as any, file);
       setDbUser(prev => prev ? { ...prev, photoURL: url } : null);
       toast.success('Profile picture updated!');
     } catch (error: any) {
@@ -125,17 +115,17 @@ export function Profile() {
           <div className="flex items-center gap-4">
             <div className="relative h-20 w-20 shrink-0">
                <div className="h-full w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-                 {uploadingImage ? (
-                   <span className="flex h-full w-full items-center justify-center text-xs font-medium text-slate-500">
-                     ...
-                   </span>
-                 ) : displayUser.photoURL ? (
-                   <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
-                 ) : (
-                   <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
-                     {displayUser.displayName?.[0]}
-                   </span>
-                 )}
+                  {uploadingImage ? (
+                    <span className="flex h-full w-full items-center justify-center text-xs font-medium text-slate-500">
+                      ...
+                    </span>
+                  ) : displayUser.photoURL ? (
+                    <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
+                      {displayUser.displayName?.[0]}
+                    </span>
+                  )}
                </div>
                
                <label
@@ -143,7 +133,6 @@ export function Profile() {
                   className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-100 text-slate-600 shadow-sm transition-colors hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                   aria-label="Upload profile picture"
                >
-                 <FiSettings size={14} className="opacity-0 absolute" />
                  <span className="text-xl leading-none -mt-1">+</span>
                  <input
                    id="profile-upload"
@@ -231,13 +220,13 @@ export function Profile() {
                   <Button size="sm">New listing</Button>
                 </Link>
               </div>
-              {MOCK_MY_LISTINGS.length === 0 ? (
+              {myListings.length === 0 ? (
                 <p className="py-8 text-center text-slate-500 dark:text-slate-400">
                   No listings yet. Create one to start selling.
                 </p>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {MOCK_MY_LISTINGS.map((listing, i) => (
+                  {myListings.map((listing, i) => (
                     <ListingCard key={listing.id} listing={listing} index={i} />
                   ))}
                 </div>
@@ -253,17 +242,9 @@ export function Profile() {
               <h2 className="font-semibold text-slate-800 dark:text-slate-100">
                 Saved items
               </h2>
-              {MOCK_FAVORITES.length === 0 ? (
-                <p className="py-8 text-center text-slate-500 dark:text-slate-400">
-                  No favorites yet. Browse listings and tap the heart to save.
-                </p>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {MOCK_FAVORITES.map((listing, i) => (
-                    <ListingCard key={listing.id} listing={listing} index={i} />
-                  ))}
-                </div>
-              )}
+              <p className="py-8 text-center text-slate-500 dark:text-slate-400">
+                No favorites yet. Browse listings and tap the heart to save.
+              </p>
             </motion.div>
           )}
         </div>

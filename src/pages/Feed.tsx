@@ -5,7 +5,7 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { CreatePost } from '../components/Feed/CreatePost';
 import { PostCard } from '../components/Feed/PostCard';
 import { getFeedPosts } from '../services/feedService';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import type { Post } from '../types';
 import { Button } from '../components/Button';
 
@@ -25,37 +25,39 @@ export function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const fetchPosts = useCallback(async (reset = false) => {
-    if (!user && activeTab === 'campus') return;
+    // Note: for Sugabase migration, we might need a public user profile fetch here
+    // But for now let's stick to the feed fetch
     try {
       if (reset) {
         setLoading(true);
-        setPosts([]);
       }
       
+      const pageToFetch = reset ? 0 : currentPage;
+      
       const result = await getFeedPosts({
-        campusId: activeTab === 'campus' ? user?.campusId : undefined,
+        campusId: activeTab === 'campus' ? (user as any)?.campusId : undefined,
         category: activeTab === 'categories' ? activeCategory : undefined,
         isTrending: activeTab === 'trending',
-        lastDoc: reset ? null : lastDoc,
+        lastPage: pageToFetch,
       });
 
       setPosts(prev => reset ? result.posts : [...prev, ...result.posts]);
-      setLastDoc(result.lastDoc);
-      setHasMore(result.posts.length > 0 && result.lastDoc !== null);
+      setCurrentPage(result.nextPage ?? 0);
+      setHasMore(result.nextPage !== null);
     } catch (error) {
       console.error('Failed to fetch posts', error);
     } finally {
       setLoading(false);
     }
-  }, [activeTab, activeCategory, user, lastDoc]);
+  }, [activeTab, activeCategory, user, currentPage]);
 
   useEffect(() => {
     fetchPosts(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, activeCategory, user]);
+  }, [activeTab, activeCategory]); // Removed 'user' to avoid fetch loop if user object changes slightly
 
   const handleScroll = (e: React.UIEvent<HTMLElement>) => {
     const bottom = e.currentTarget.scrollHeight - e.currentTarget.scrollTop <= e.currentTarget.clientHeight + 100;

@@ -6,7 +6,9 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
-import { LISTING_CATEGORIES, SERVICE_CATEGORIES, type Condition } from '../types';
+import { LISTING_CATEGORIES, SERVICE_CATEGORIES, type Condition, type Listing } from '../types';
+import { createListing } from '../services/listingService';
+import { useAuth } from '../contexts/AuthContext';
 
 const CONDITIONS: { value: Condition; label: string }[] = [
   { value: 'new', label: 'New' },
@@ -18,6 +20,7 @@ const CONDITIONS: { value: Condition; label: string }[] = [
 
 export function CreateListing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [type, setType] = useState<'sell' | 'buy' | 'service'>('sell');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -25,7 +28,8 @@ export function CreateListing() {
   const [category, setCategory] = useState('');
   const [condition, setCondition] = useState<Condition>('good');
   const [location, setLocation] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,19 +42,25 @@ export function CreateListing() {
     if (errors.category) setErrors((e) => ({ ...e, category: '' }));
   };
 
-  const addImage = () => {
-    // Placeholder: in real app upload to Firebase Storage and get URL
-    const placeholder = `https://picsum.photos/400/300?r=${Math.random()}`;
-    if (images.length < 5) {
-      setImages((prev) => [...prev, placeholder]);
-      clearError('images')();
-    } else {
-      toast.info('Max 5 images per listing.');
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    
+    if (imageFiles.length + files.length > 5) {
+      toast.error('Maximum 5 images allowed.');
+      return;
     }
+
+    const newUrls = files.map(file => URL.createObjectURL(file));
+    setImageFiles(prev => [...prev, ...files]);
+    setImageUrls(prev => [...prev, ...newUrls]);
+    clearError('images')();
   };
 
-  const removeImage = (i: number) => {
-    setImages((prev) => prev.filter((_, idx) => idx !== i));
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(imageUrls[index]);
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const validate = (): boolean => {
@@ -63,12 +73,12 @@ export function CreateListing() {
     }
     if (!category) next.category = 'Category is required';
     if (!location.trim()) next.location = 'Location is required';
-    if (images.length === 0) next.images = 'Add at least one image';
+    if (imageFiles.length === 0) next.images = 'Add at least one image';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const clearError = (field: keyof Record<string, string>) => () => {
+  const clearError = (field: string) => () => {
     setErrors((e) => {
       const next = { ...e };
       delete next[field];
@@ -79,13 +89,34 @@ export function CreateListing() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    if (!user) {
+      toast.error('You must be logged in.');
+      return;
+    }
     setLoading(true);
     try {
-      // TODO: Firebase Firestore add listing
-      await new Promise((r) => setTimeout(r, 1000));
+      const listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'> = {
+        userId: user.id,
+        type,
+        title,
+        description,
+        price: Number(price),
+        currency: 'USD',
+        category: category as any,
+        condition: type === 'service' ? undefined : condition,
+        images: [], // Will be filled by service
+        location,
+        campusId: user.campusId || '',
+        universityId: user.universityId || '',
+        isPremium,
+        status: 'active',
+      };
+
+      await createListing(listingData, imageFiles);
       toast.success('Listing created!');
       navigate('/listings');
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error('Failed to create listing. Try again.');
     } finally {
       setLoading(false);
@@ -236,7 +267,7 @@ export function CreateListing() {
               Photos (max 5)
             </label>
             <div className="flex flex-wrap gap-3">
-              {images.map((url, i) => (
+              {imageUrls.map((url, i) => (
                 <motion.div
                   key={i}
                   layout
@@ -252,14 +283,13 @@ export function CreateListing() {
                   </button>
                 </motion.div>
               ))}
-              {images.length < 5 && (
-                <button
-                  type="button"
-                  onClick={addImage}
-                  className="flex h-24 w-24 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-emerald-400 hover:text-emerald-500 dark:border-slate-600 dark:hover:border-emerald-600"
+              {imageUrls.length < 5 && (
+                <label
+                  className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-emerald-400 hover:text-emerald-500 dark:border-slate-600 dark:hover:border-emerald-600"
                 >
                   <FiUpload size={28} />
-                </button>
+                  <input type="file" accept="image/*" multiple hidden onChange={handleImageChange} />
+                </label>
               )}
             </div>
             {errors.images && (

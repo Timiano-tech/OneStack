@@ -6,8 +6,8 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
-import { getFirebaseAuth } from '../firebase';
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
+import { syncUserToSupabase } from '../services/userService';
 import { FcGoogle } from 'react-icons/fc';
 
 const MOCK_UNIVERSITIES = [
@@ -72,19 +72,28 @@ export function Register() {
     }
     setLoading(true);
     try {
-      const auth = getFirebaseAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      
-      // Update display name
-      await updateProfile(userCredential.user, {
-        displayName: form.displayName
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            display_name: form.displayName,
+            phone: form.phone,
+            university_id: form.universityId,
+            campus_id: form.campusId,
+          }
+        }
       });
       
-      // Send verification email
-      await sendEmailVerification(userCredential.user);
-      
-      // Sign out the user immediately so they must verify and log in
-      await signOut(auth);
+      if (error) throw error;
+      if (!data.user) throw new Error('Registration failed');
+
+      // Sync user to our public.users table
+      await syncUserToSupabase(data.user, {
+        displayName: form.displayName,
+        universityId: form.universityId,
+        campusId: form.campusId,
+      });
 
       toast.success('Account created! Please check your email to verify.');
       setIsSuccess(true);
@@ -98,25 +107,19 @@ export function Register() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const auth = getFirebaseAuth();
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // If we want to assign a default name if they don't have one
-      if (!userCredential.user.displayName && form.displayName) {
-         await updateProfile(userCredential.user, { displayName: form.displayName });
-      }
-
-      toast.success('Google sign in successful!');
-      // Assuming Google login implies verification
-      // But we still need them to complete the university/campus step ideally
-      // For now, let's just complete step 1 and move them to step 2 if they logged in with Google but we need University info
-      if (step === 1) {
-         setStep(2);
-      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      if (error) throw error;
     } catch (error: any) {
       toast.error(error.message || 'Google sign in failed.');
-    } finally {
       setLoading(false);
     }
   };
@@ -291,9 +294,6 @@ export function Register() {
                 {step === 1 ? 'Continue' : 'Create account'}
               </Button>
             </div>
-            
-            {/* Duplicate Google login removed */}
-            
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
             Already have an account?{' '}

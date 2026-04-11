@@ -21,8 +21,8 @@ export function PostCard({ post, authorsMap, onLikeChange, onSaveChange }: PostC
   const [saveCount, setSaveCount] = useState(post.saveCount);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
-  // Fallback author if map not loaded yet
-  const author = authorsMap[post.userId] || {
+  // Prefer author data from post, fallback to map if map provided, else empty
+  const author = (post as any).author || authorsMap[post.userId] || {
     displayName: 'Student',
     isVerifiedStudent: true,
   };

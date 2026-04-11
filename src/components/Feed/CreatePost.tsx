@@ -5,7 +5,7 @@ import { Button } from '../Button';
 import { toast } from '../Toast';
 import type { PostCategory } from '../../types';
 import { createPost } from '../../services/feedService';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CATEGORIES: PostCategory[] = ['Marketplace', 'Services', 'Deals', 'Jobs', 'Announcements', 'General'];
 
@@ -68,9 +68,9 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
         .filter(t => t.length > 0);
 
       await createPost({
-        userId: user.uid,
-        campusId: user.campusId,
-        universityId: user.universityId,
+        userId: user.id,
+        campusId: user.campusId || '',
+        universityId: user.universityId || '',
         content,
         category,
         hashtags,

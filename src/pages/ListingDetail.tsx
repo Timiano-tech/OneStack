@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiMapPin, FiMessageCircle, FiShare2, FiFlag, FiChevronLeft, FiStar } from 'react-icons/fi';
@@ -6,49 +6,62 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { toast } from '../components/Toast';
 import type { Listing } from '../types';
-
-// Mock listing
-const MOCK: Listing = {
-  id: '1',
-  userId: 'u1',
-  type: 'sell',
-  title: 'MacBook Pro 14" M3 - Like New',
-  description:
-    'Barely used MacBook Pro 14" with M3 chip. Comes with original box, charger, and 1 year of Apple Care remaining. No scratches, battery health 100%. Selling because I switched to a desktop setup.',
-  price: 1299,
-  currency: 'USD',
-  category: 'Electronics',
-  condition: 'like_new',
-  images: [
-    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
-    'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800',
-  ],
-  location: 'North Campus, Library building',
-  campusId: 'c1',
-  universityId: 'uni1',
-  isPremium: true,
-  status: 'active',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
-const MOCK_SELLER = {
-  id: 'u1',
-  displayName: 'Alex Chen',
-  photoURL: '',
-  isVerifiedStudent: true,
-  trustScore: 4.8,
-};
+import { getListingById } from '../services/listingService';
+import { supabase } from '../lib/supabase';
 
 export function ListingDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [listing] = useState<Listing>({ ...MOCK, id: id || MOCK.id });
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [seller, setSeller] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showReport, setShowReport] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+    
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const data = await getListingById(id);
+        if (data) {
+          setListing(data);
+          
+          // Fetch seller profile
+          const { data: sellerProfile } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.userId)
+            .single();
+            
+          if (sellerProfile) {
+            setSeller({
+              id: sellerProfile.id,
+              displayName: sellerProfile.display_name,
+              photoURL: sellerProfile.photo_url,
+              isVerifiedStudent: sellerProfile.is_verified_student,
+              trustScore: sellerProfile.trust_score,
+            });
+          }
+        } else {
+          toast.error('Listing not found');
+          navigate('/listings');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Error fetching listing');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id, navigate]);
+
   const handleShare = () => {
+    if (!listing) return;
     if (navigator.share) {
       navigator.share({
         title: listing.title,
@@ -60,6 +73,16 @@ export function ListingDetail() {
       toast.success('Link copied!');
     }
   };
+
+  if (loading) {
+    return (
+      <AnimatedPage className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+      </AnimatedPage>
+    );
+  }
+
+  if (!listing) return null;
 
   return (
     <AnimatedPage className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -167,44 +190,46 @@ export function ListingDetail() {
         </div>
 
         {/* Seller card */}
-        <div className="border-b border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-          <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Seller</h2>
-          <div className="flex items-center justify-between gap-4">
-            <Link
-              to={`/profile/${MOCK_SELLER.id}`}
-              className="flex items-center gap-3"
-            >
-              <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-                {MOCK_SELLER.photoURL ? (
-                  <img src={MOCK_SELLER.photoURL} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-500">
-                    {MOCK_SELLER.displayName[0]}
-                  </span>
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-slate-800 dark:text-slate-100">
-                    {MOCK_SELLER.displayName}
-                  </span>
-                  {MOCK_SELLER.isVerifiedStudent && (
-                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-                      Verified
+        {seller && (
+          <div className="border-b border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Seller</h2>
+            <div className="flex items-center justify-between gap-4">
+              <Link
+                to={`/profile/${seller.id}`}
+                className="flex items-center gap-3"
+              >
+                <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
+                  {seller.photoURL ? (
+                    <img src={seller.photoURL} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-500">
+                      {seller.displayName[0]}
                     </span>
                   )}
                 </div>
-                <p className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
-                  <FiStar className="text-amber-500" size={14} />
-                  {MOCK_SELLER.trustScore} rating
-                </p>
-              </div>
-            </Link>
-            <Link to={`/chat?listing=${listing.id}&seller=${listing.userId}`}>
-              <Button leftIcon={FiMessageCircle}>Chat</Button>
-            </Link>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-slate-800 dark:text-slate-100">
+                      {seller.displayName}
+                    </span>
+                    {seller.isVerifiedStudent && (
+                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <p className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+                    <FiStar className="text-amber-500" size={14} />
+                    {seller.trustScore} rating
+                  </p>
+                </div>
+              </Link>
+              <Link to={`/chat?listing=${listing.id}&seller=${listing.userId}`}>
+                <Button leftIcon={FiMessageCircle}>Chat</Button>
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Sticky CTA on mobile */}
         <div className="safe-bottom sticky bottom-0 border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">

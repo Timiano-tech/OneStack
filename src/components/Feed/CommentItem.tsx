@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMoreHorizontal, FiCornerDownRight, FiTrash2 } from 'react-icons/fi';
 import { formatDistanceToNow } from '../../utils/dateUtils';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { addComment, deleteComment } from '../../services/feedService';
 import { Button } from '../Button';
 import { toast } from '../Toast';
@@ -33,7 +33,7 @@ export function CommentItem({
   const [showActions, setShowActions] = useState(false);
 
   // Fallback author
-  const author = authorsMap[comment.userId] || {
+  const author = (comment as any).author || authorsMap[comment.userId] || {
     displayName: 'Student',
   };
 
@@ -42,7 +42,7 @@ export function CommentItem({
     if (!replyContent.trim() || !user) return;
     setLoading(true);
     try {
-      await addComment(postId, user.uid, replyContent.trim(), comment.id);
+      await addComment(postId, user.id, replyContent.trim(), comment.id);
       setReplyContent('');
       setIsReplying(false);
       onCommentAdded();
@@ -66,7 +66,7 @@ export function CommentItem({
     }
   };
 
-  const isOwner = user?.uid === comment.userId;
+  const isOwner = user?.id === comment.userId;
 
   return (
     <div className="flex gap-3">

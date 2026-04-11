@@ -6,8 +6,7 @@ import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { toast } from '../components/Toast';
-import { getFirebaseAuth } from '../firebase';
-import { signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 import { FcGoogle } from 'react-icons/fc';
 
 export function Login() {
@@ -32,14 +31,15 @@ export function Login() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const auth = getFirebaseAuth();
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      if (!userCredential.user.emailVerified) {
-        await signOut(auth);
-        toast.error('Please verify your email before logging in.');
-        setLoading(false);
-        return;
+      if (error) throw error;
+
+      if (!data.user) {
+        throw new Error('No user data returned');
       }
 
       toast.success('Welcome back!');
@@ -54,14 +54,16 @@ export function Login() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const auth = getFirebaseAuth();
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      toast.success('Welcome back!');
-      navigate('/');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      // Redirect happens automatically
     } catch (error: any) {
       toast.error(error.message || 'Google sign in failed.');
-    } finally {
       setLoading(false);
     }
   };

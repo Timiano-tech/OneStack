@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiSliders, FiX } from 'react-icons/fi';
@@ -7,114 +7,49 @@ import { Input } from '../components/Input';
 import { ListingCard } from '../components/ListingCard';
 import { Button } from '../components/Button';
 import { LISTING_CATEGORIES, SERVICE_CATEGORIES, type Listing } from '../types';
-
-// Mock data
-const MOCK_LISTINGS: Listing[] = [
-  {
-    id: '1',
-    userId: 'u1',
-    type: 'sell',
-    title: 'MacBook Pro 14" M3',
-    description: 'Like new.',
-    price: 1299,
-    currency: 'USD',
-    category: 'Electronics',
-    condition: 'like_new',
-    images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400'],
-    location: 'North Campus',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: true,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    userId: 'u2',
-    type: 'service',
-    title: 'Math & Physics Tutoring',
-    description: 'All levels.',
-    price: 25,
-    currency: 'USD',
-    category: 'Tutoring',
-    images: ['https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400'],
-    location: 'Central Library',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: false,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    userId: 'u3',
-    type: 'sell',
-    title: 'IKEA Desk + Chair',
-    description: 'Moving out.',
-    price: 120,
-    currency: 'USD',
-    category: 'Furniture',
-    condition: 'good',
-    images: ['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400'],
-    location: 'South Dorms',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: false,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    userId: 'u4',
-    type: 'sell',
-    title: 'Calculus Textbook',
-    description: 'Stewart 9th ed.',
-    price: 45,
-    currency: 'USD',
-    category: 'Books',
-    condition: 'good',
-    images: ['https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400'],
-    location: 'East Hall',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: false,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import { getListings } from '../services/listingService';
+import { useAuth } from '../contexts/AuthContext';
 
 const ALL_CATEGORIES = [...LISTING_CATEGORIES, ...SERVICE_CATEGORIES];
 
 export function Listings() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
+  
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = useMemo(() => {
-    let list = [...MOCK_LISTINGS];
-    if (query) {
-      const q = query.toLowerCase();
-      list = list.filter(
-        (l) =>
-          l.title.toLowerCase().includes(q) ||
-          l.description.toLowerCase().includes(q) ||
-          l.category.toLowerCase().includes(q)
-      );
+  const fetchListings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getListings({
+        category: category || undefined,
+        query: query || undefined,
+        campusId: (user as any)?.campusId,
+      });
+      setListings(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    if (category) {
-      list = list.filter((l) => l.category.toLowerCase() === category.toLowerCase());
-    }
+  }, [category, query, user]);
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
+
+  const sortedListings = useMemo(() => {
+    const list = [...listings];
     if (sortBy === 'price_asc') list.sort((a, b) => a.price - b.price);
     if (sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
     if (sortBy === 'newest') list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return list;
-  }, [query, category, sortBy]);
+  }, [listings, sortBy]);
 
   const applyFilters = () => {
     const next = new URLSearchParams(searchParams);
@@ -172,7 +107,7 @@ export function Listings() {
                 >
                   <option value="">All</option>
                   {ALL_CATEGORIES.map((c) => (
-                    <option key={c} value={c.toLowerCase()}>
+                    <option key={c} value={c}>
                       {c}
                     </option>
                   ))}
@@ -205,25 +140,32 @@ export function Listings() {
 
       <div className="mx-auto max-w-7xl px-4 py-6">
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          {filtered.length} listing{filtered.length !== 1 ? 's' : ''}
+          {sortedListings.length} listing{sortedListings.length !== 1 ? 's' : ''}
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {filtered.length === 0 ? (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400"
-              >
-                No listings match your filters. Try adjusting your search.
-              </motion.p>
-            ) : (
-              filtered.map((listing, i) => (
-                <ListingCard key={listing.id} listing={listing} index={i} />
-              ))
-            )}
-          </AnimatePresence>
-        </div>
+        
+        {loading ? (
+           <div className="flex justify-center py-20">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+           </div>
+        ) : (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {sortedListings.length === 0 ? (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400"
+                >
+                  No listings match your filters. Try adjusting your search.
+                </motion.p>
+              ) : (
+                sortedListings.map((listing, i) => (
+                  <ListingCard key={listing.id} listing={listing} index={i} />
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </AnimatedPage>
   );
