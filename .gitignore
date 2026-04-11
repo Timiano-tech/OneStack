@@ -28,3 +28,11 @@ src/.env
 *.njsproj
 *.sln
 *.sw?
+
+# Next.js build output
+.next/
+next-env.d.ts
+
+# Temp migration scripts
+fix_imports.*
+fix_views.cjs
