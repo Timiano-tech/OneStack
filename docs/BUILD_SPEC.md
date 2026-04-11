@@ -100,6 +100,54 @@ CREATE TABLE public.users (
 | `trust_score` | numeric | 0–5 rating average |
 | `role` | text | `user` \| `admin` \| `moderator` |
 
+#### Auto-create on sign-up (trigger)
+
+When a user signs up via Supabase Auth, a PostgreSQL trigger automatically creates the corresponding row in `public.users`. Run this in the **SQL Editor**:
+
+```sql
+-- Function: copy new auth user into public.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.users (
+    id,
+    email,
+    display_name,
+    photo_url,
+    university_id,
+    campus_id
+  )
+  VALUES (
+    NEW.id,
+    NEW.email,
+    -- pull display_name from the metadata passed during signUp()
+    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
+    -- Google OAuth provides a picture field
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture'),
+    NEW.raw_user_meta_data->>'university_id',
+    NEW.raw_user_meta_data->>'campus_id'
+  )
+  ON CONFLICT (id) DO NOTHING;  -- safe to re-run / idempotent
+
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger: fire after every new row in auth.users
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE PROCEDURE public.handle_new_user();
+```
+
+> **How it works:** When `supabase.auth.signUp()` is called from the app, the `options.data` object (containing `display_name`, `university_id`, `campus_id`) is stored in `auth.users.raw_user_meta_data`. The trigger reads those fields and populates `public.users` automatically — no manual `syncUserToSupabase()` call required for new sign-ups.
+
+> **Google OAuth:** The trigger also handles Google sign-in automatically. Google provides `picture` in the metadata, which is mapped to `photo_url`.
+
 ---
 
 ### 4.2 `listings`

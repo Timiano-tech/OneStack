@@ -29,7 +29,7 @@ export function Navbar({
     <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-100 dark:bg-[#09090b]/95 dark:border-slate-800/80 shadow-sm backdrop-blur-md safe-bottom">
       <div className="mx-auto flex h-12 w-full items-center justify-between px-3 sm:h-14 sm:max-w-7xl sm:px-4">
         <Link href="/" className="flex min-w-0 items-center gap-2">
-          <img src="/logo.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
+          <img src="/OneStack (1).png" alt="Logo" className="h-12 w-12 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
           <span className="min-w-0 truncate text-base font-bold tracking-tight text-slate-800 dark:text-slate-100 sm:text-lg">
             {SITE.appName}
           </span>
@@ -44,11 +44,10 @@ export function Navbar({
             return (
               <Link key={to} href={to}>
                 <motion.span
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-                  }`}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${active
+                    ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+                    }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -91,7 +90,7 @@ export function Navbar({
           >
             {theme === 'dark' ? <FiSun size={20} /> : <FiMoon size={20} />}
           </button>
-          
+
           <Link href="/pricing" className="sm:hidden">
             <motion.span
               className="flex items-center justify-center rounded-xl bg-amber-100 p-2 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
