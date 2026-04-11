@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiUpload, FiX } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -19,7 +20,7 @@ const CONDITIONS: { value: Condition; label: string }[] = [
 ];
 
 export function CreateListing() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
   const [type, setType] = useState<'sell' | 'buy' | 'service'>('sell');
   const [title, setTitle] = useState('');
@@ -114,7 +115,7 @@ export function CreateListing() {
 
       await createListing(listingData, imageFiles);
       toast.success('Listing created!');
-      navigate('/listings');
+      router.push('/listings');
     } catch (err) {
       console.error(err);
       toast.error('Failed to create listing. Try again.');
@@ -310,11 +311,11 @@ export function CreateListing() {
           </label>
 
           <p className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-            Free: 3 active listings. <Link to="/pricing" className="font-medium text-emerald-600 dark:text-emerald-400">Upgrade to Premium</Link> for unlimited listings and boosts.
+            Free: 3 active listings. <Link href="/pricing" className="font-medium text-emerald-600 dark:text-emerald-400">Upgrade to Premium</Link> for unlimited listings and boosts.
           </p>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => navigate(-1)} className="flex-1">
+            <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
               Cancel
             </Button>
             <Button type="submit" loading={loading} className="flex-1">

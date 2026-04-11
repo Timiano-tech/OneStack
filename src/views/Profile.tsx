@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiStar, FiSettings, FiLogOut, FiZap } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -13,7 +14,7 @@ import { getListings } from '../services/listingService';
 
 export function Profile() {
   const { user: authUser, logout } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
   const [dbUser, setDbUser] = useState<User | null>(null);
   const [myListings, setMyListings] = useState<Listing[]>([]);
@@ -62,7 +63,7 @@ export function Profile() {
           <p className="mt-2 text-slate-600 dark:text-slate-400">
             Sign in to view your profile and listings.
           </p>
-          <Link to="/login" className="mt-4 inline-block">
+          <Link href="/login" className="mt-4 inline-block">
             <Button>Sign in</Button>
           </Link>
         </div>
@@ -102,7 +103,7 @@ export function Profile() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      router.push('/login');
     } catch {
       toast.error('Failed to log out.');
     }
@@ -161,7 +162,7 @@ export function Profile() {
                 {displayUser.trustScore} seller rating
               </p>
             </div>
-            <Link to="/profile/settings">
+            <Link href="/profile/settings">
               <Button variant="ghost" leftIcon={FiSettings} aria-label="Settings">
                 Settings
               </Button>
@@ -170,7 +171,7 @@ export function Profile() {
         </div>
 
         <Link
-          to="/pricing"
+          href="/pricing"
           className="mt-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20"
         >
           <span className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
@@ -216,7 +217,7 @@ export function Profile() {
                 <h2 className="font-semibold text-slate-800 dark:text-slate-100">
                   Your listings
                 </h2>
-                <Link to="/listing/create">
+                <Link href="/listing/create">
                   <Button size="sm">New listing</Button>
                 </Link>
               </div>

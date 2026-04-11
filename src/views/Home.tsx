@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiSearch, FiShield, FiTrendingUp, FiMessageCircle, FiZap } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -116,7 +116,7 @@ export function Home() {
               transition={{ duration: 0.4, delay: 0.3 }}
               className="mt-8 flex flex-col sm:flex-row items-center gap-4"
             >
-              <Link to="/listings" className="w-full sm:w-auto">
+              <Link href="/listings" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto bg-accent text-white rounded-full hover:opacity-90 transition-opacity"
@@ -125,7 +125,7 @@ export function Home() {
                   Start Exploring
                 </Button>
               </Link>
-              <Link to="/register" className="w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
                 <Button 
                   size="lg" 
                   variant="outline" 
@@ -180,7 +180,7 @@ export function Home() {
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Categories</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {categories.map((cat, i) => (
-              <Link key={cat.slug} to={`/listings?category=${cat.slug}`}>
+              <Link key={cat.slug} href={`/listings?category=${cat.slug}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -203,7 +203,7 @@ export function Home() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Featured</h2>
             <Link
-              to="/listings"
+              href="/listings"
               className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
             >
               View all &rarr;

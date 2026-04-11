@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiCheck, FiZap, FiArrowLeft } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -10,7 +10,7 @@ export function Pricing() {
     <AnimatedPage className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="sticky top-0 z-10 flex h-12 items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
         <Link
-          to="/"
+          href="/"
           className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"
         >
           <FiArrowLeft size={18} />
@@ -60,7 +60,7 @@ export function Pricing() {
                 </li>
               ))}
             </ul>
-            <Link to="/register" className="mt-4 block">
+            <Link href="/register" className="mt-4 block">
               <Button variant="outline" fullWidth>
                 Get started free
               </Button>
@@ -97,7 +97,7 @@ export function Pricing() {
                 </li>
               ))}
             </ul>
-            <Link to="/register?plan=premium" className="mt-4 block">
+            <Link href="/register?plan=premium" className="mt-4 block">
               <Button fullWidth>Subscribe to Premium</Button>
             </Link>
             <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">

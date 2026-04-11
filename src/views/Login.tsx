@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -10,7 +11,7 @@ import { supabase } from '../lib/supabase';
 import { FcGoogle } from 'react-icons/fc';
 
 export function Login() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ export function Login() {
       }
 
       toast.success('Welcome back!');
-      navigate('/');
+      router.push('/');
     } catch (error: any) {
       toast.error(error.message || 'Invalid email or password.');
     } finally {
@@ -104,7 +105,7 @@ export function Login() {
             />
             <div className="flex justify-end">
               <Link
-                to="/forgot-password"
+                href="/forgot-password"
                 className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
               >
                 Forgot password?
@@ -138,7 +139,7 @@ export function Login() {
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
             Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
+            <Link href="/register" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
               Sign up
             </Link>
           </p>

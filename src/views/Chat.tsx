@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiSend, FiChevronLeft } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -75,7 +75,7 @@ export function Chat() {
                 <p className="text-center text-slate-500 dark:text-slate-400">
                   No conversations yet. Start by messaging a seller from a listing.
                 </p>
-                <Link to="/listings">
+                <Link href="/listings">
                   <Button>Browse listings</Button>
                 </Link>
               </div>

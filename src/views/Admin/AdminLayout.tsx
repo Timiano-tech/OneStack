@@ -1,4 +1,5 @@
-import { Outlet, Link, NavLink } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   FiGrid,
   FiUsers,
@@ -20,15 +21,16 @@ const navItems = [
   { to: '/admin/analytics', end: false, label: 'Analytics', icon: FiBarChart2 },
 ];
 
-export function AdminLayout() {
+export function AdminLayout({ children }: { children?: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname() || '/';
 
   return (
     <div className="flex min-h-screen bg-slate-100 dark:bg-slate-900">
       {/* Desktop sidebar */}
       <aside className="hidden h-screen w-64 shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 lg:flex lg:flex-col">
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-4 dark:border-slate-700">
-          <Link to="/admin" className="flex items-center gap-2">
+          <Link href="/admin" className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white">
               <FiGrid size={18} />
             </span>
@@ -36,26 +38,26 @@ export function AdminLayout() {
           </Link>
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
-          {navItems.map(({ to, end, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+          {navItems.map(({ to, end, label, icon: Icon }) => {
+            const isActive = end ? pathname === to : pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                href={to}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
-                }`
-              }
-            >
-              <Icon size={20} />
-              {label}
-            </NavLink>
-          ))}
+                }`}
+              >
+                <Icon size={20} />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
         <div className="shrink-0 border-t border-slate-200 p-3 dark:border-slate-700">
-          <Link to="/">
+          <Link href="/">
             <Button variant="ghost" fullWidth leftIcon={FiLogOut} className="justify-start">
               Back to app
             </Button>
@@ -87,22 +89,22 @@ export function AdminLayout() {
           </button>
         </div>
         <nav className="p-3">
-          {navItems.map(({ to, end, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${
+          {navItems.map(({ to, end, label, icon: Icon }) => {
+            const isActive = end ? pathname === to : pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                href={to}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${
                   isActive ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'
-                }`
-              }
-            >
-              <Icon size={20} />
-              {label}
-            </NavLink>
-          ))}
+                }`}
+              >
+                <Icon size={20} />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
 
@@ -117,14 +119,14 @@ export function AdminLayout() {
             <FiMenu size={24} />
           </button>
           <div className="flex-1" />
-          <Link to="/">
+          <Link href="/">
             <Button variant="ghost" size="sm">
               View site
             </Button>
           </Link>
         </header>
         <main className="flex-1 p-4 sm:p-6">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>

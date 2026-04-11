@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiUser, FiPhone } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -141,7 +141,7 @@ export function Register() {
             Please verify your email address before logging in.
           </p>
           <div className="mt-10">
-            <Link to="/login">
+            <Link href="/login">
               <Button size="lg" className="w-full sm:w-auto">
                 Go to login
               </Button>
@@ -297,7 +297,7 @@ export function Register() {
           </form>
           <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
             Already have an account?{' '}
-            <Link to="/login" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
+            <Link href="/login" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
               Sign in
             </Link>
           </p>

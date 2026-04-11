@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiMail } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -60,7 +60,7 @@ export function ForgotPassword() {
           </form>
         )}
         <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
-          <Link to="/login" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
+          <Link href="/login" className="font-medium text-emerald-600 hover:underline dark:text-emerald-400">
             Back to sign in
           </Link>
         </p>

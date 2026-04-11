@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiSliders, FiX } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -14,9 +14,12 @@ const ALL_CATEGORIES = [...LISTING_CATEGORIES, ...SERVICE_CATEGORIES];
 
 export function Listings() {
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || '');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [query, setQuery] = useState(searchParams?.get('q') || '');
+  const [category, setCategory] = useState(searchParams?.get('category') || '');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
   
@@ -52,12 +55,12 @@ export function Listings() {
   }, [listings, sortBy]);
 
   const applyFilters = () => {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(Array.from(searchParams?.entries() || []));
     if (query) next.set('q', query);
     else next.delete('q');
     if (category) next.set('category', category);
     else next.delete('category');
-    setSearchParams(next);
+    router.replace(`${pathname}?${next.toString()}`);
     setShowFilters(false);
   };
 
@@ -65,7 +68,7 @@ export function Listings() {
     setQuery('');
     setCategory('');
     setSortBy('newest');
-    setSearchParams({});
+    router.replace(pathname || ' /listings');
     setShowFilters(false);
   };
 

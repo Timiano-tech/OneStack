@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { FiArrowLeft } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { PostCard } from '../components/Feed/PostCard';
@@ -18,7 +18,7 @@ const mockAuthorsMap: Record<string, any> = {
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -61,7 +61,7 @@ export function PostDetail() {
         setComments(fetchedComments);
       } else {
         toast.error('Post not found');
-        navigate('/feed');
+        router.push('/feed');
       }
     } catch (err) {
       console.error(err);
@@ -69,7 +69,7 @@ export function PostDetail() {
     } finally {
       setLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, router]);
 
   useEffect(() => {
     fetchPostAndComments();
@@ -118,7 +118,7 @@ export function PostDetail() {
       <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md px-4 py-3 dark:border-slate-800/95">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => router.back()}
             className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
           >
             <FiArrowLeft size={20} />
