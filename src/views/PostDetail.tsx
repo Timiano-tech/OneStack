@@ -11,11 +11,6 @@ import { Button } from '../components/Button';
 import { toast } from '../components/Toast';
 import type { Post, Comment } from '../types';
 
-// Mock authors for Feed display testing
-const mockAuthorsMap: Record<string, any> = {
-  'u123': { displayName: 'Jane Doe', photoURL: 'https://i.pravatar.cc/150?u=u123', isVerifiedStudent: true },
-};
-
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -130,7 +125,6 @@ export function PostDetail() {
       <div className="mx-auto max-w-2xl px-4 py-4 sm:py-6">
         <PostCard 
           post={post} 
-          authorsMap={mockAuthorsMap}
           onLikeChange={(_, count) => setPost(p => p ? { ...p, likeCount: count } : p)}
           onSaveChange={(_, count) => setPost(p => p ? { ...p, saveCount: count } : p)}
         />
@@ -149,7 +143,6 @@ export function PostDetail() {
                 <CommentItem
                   key={comment.id}
                   comment={comment}
-                  authorsMap={mockAuthorsMap}
                   replies={repliesByParent[comment.id] || []}
                   postId={post.id}
                   onCommentAdded={fetchPostAndComments}

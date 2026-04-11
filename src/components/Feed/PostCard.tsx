@@ -3,53 +3,102 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FiHeart, FiMessageCircle, FiShare2, FiBookmark, FiMoreHorizontal, FiShield } from 'react-icons/fi';
 import { formatDistanceToNow } from '../../utils/dateUtils';
+import { useAuth } from '../../contexts/AuthContext';
+import { toggleLike, checkHasLiked, toggleSavePost, checkHasSaved } from '../../services/feedService';
 import type { Post } from '../../types';
 import { toast } from '../Toast';
+import { useEffect } from 'react';
 
 interface PostCardProps {
   post: Post;
-  authorsMap: Record<string, { displayName: string; photoURL?: string; isVerifiedStudent: boolean }>;
   onLikeChange?: (postId: string, newLikeCount: number, isLiked: boolean) => void;
   onSaveChange?: (postId: string, newSaveCount: number, isSaved: boolean) => void;
 }
 
-export function PostCard({ post, authorsMap, onLikeChange, onSaveChange }: PostCardProps) {
-  // In a real app we'd fetch author details, user's like/save state in bulk. For now we mock local state.
+export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
+  const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [saveCount, setSaveCount] = useState(post.saveCount);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
+  useEffect(() => {
+    if (user) {
+      const checkStatus = async () => {
+        try {
+          const [liked, saved] = await Promise.all([
+            checkHasLiked(post.id, user.id),
+            checkHasSaved(post.id, user.id)
+          ]);
+          setIsLiked(liked);
+          setIsSaved(saved);
+        } catch (err) {
+          console.error('Error checking post status', err);
+        }
+      };
+      checkStatus();
+    }
+  }, [post.id, user]);
+
   // Prefer author data from post, fallback to map if map provided, else empty
-  const author = (post as any).author || authorsMap[post.userId] || {
+  const author = (post as any).author || {
     displayName: 'Student',
     isVerifiedStudent: true,
   };
 
   const handleLike = async () => {
+    if (!user) {
+      toast.info('Sign in to like posts');
+      return;
+    }
+
     // Optimistic UI
     const newLiked = !isLiked;
+    const newCount = newLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
+    
     setIsLiked(newLiked);
-    setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
-    if (onLikeChange) onLikeChange(post.id, newLiked ? likeCount + 1 : likeCount - 1, newLiked);
+    setLikeCount(newCount);
+    if (onLikeChange) onLikeChange(post.id, newCount, newLiked);
 
     try {
-      // Mock toggle
-      // await toggleLike(post.id, currentUser.id);
-    } catch {
+      const result = await toggleLike(post.id, user.id);
+      if (result !== newLiked) {
+        // Correct state if it differed from optimistic expectation (e.g. concurrent change)
+        setIsLiked(result);
+        // We'd ideally re-fetch count here but for now just keep optimistic or sync slightly
+      }
+    } catch (err) {
       // Revert on error
       setIsLiked(!newLiked);
-      setLikeCount((prev) => (!newLiked ? prev + 1 : prev - 1));
+      setLikeCount(likeCount);
       toast.error('Failed to like post.');
     }
   };
 
   const handleSave = async () => {
+    if (!user) {
+      toast.info('Sign in to save posts');
+      return;
+    }
+
     const newSaved = !isSaved;
+    const newCount = newSaved ? saveCount + 1 : Math.max(0, saveCount - 1);
+
     setIsSaved(newSaved);
-    setSaveCount((prev) => (newSaved ? prev + 1 : prev - 1));
-    if (onSaveChange) onSaveChange(post.id, newSaved ? saveCount + 1 : saveCount - 1, newSaved);
+    setSaveCount(newCount);
+    if (onSaveChange) onSaveChange(post.id, newCount, newSaved);
+
+    try {
+      const result = await toggleSavePost(post.id, user.id);
+      if (result !== newSaved) {
+        setIsSaved(result);
+      }
+    } catch {
+      setIsSaved(!newSaved);
+      setSaveCount(saveCount);
+      toast.error('Failed to save post.');
+    }
   };
 
   const handleShare = () => {
@@ -192,6 +241,7 @@ export function PostCard({ post, authorsMap, onLikeChange, onSaveChange }: PostC
           <motion.div whileTap={{ scale: 0.8 }}>
             <FiBookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
           </motion.div>
+          <span className="ml-1 text-sm">{saveCount}</span>
         </button>
       </div>
     </div>

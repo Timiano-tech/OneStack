@@ -59,26 +59,42 @@ export const getListings = async (filters?: {
   category?: string;
   type?: ListingType;
   campusId?: string;
+  userId?: string;
   query?: string;
+  isPremium?: boolean;
 }) => {
-  let query = supabase.from(LISTINGS_TABLE).select('*');
+  let queryBuilder = supabase.from(LISTINGS_TABLE).select(`
+    *,
+    author:users (
+      display_name,
+      photo_url,
+      is_verified_student,
+      trust_score
+    )
+  `);
 
   if (filters?.category && filters.category !== 'All') {
-    query = query.eq('category', filters.category);
+    queryBuilder = queryBuilder.eq('category', filters.category);
   }
   if (filters?.type) {
-    query = query.eq('type', filters.type);
+    queryBuilder = queryBuilder.eq('type', filters.type);
   }
   if (filters?.campusId) {
-    query = query.eq('campus_id', filters.campusId);
+    queryBuilder = queryBuilder.eq('campus_id', filters.campusId);
+  }
+  if (filters?.userId) {
+    queryBuilder = queryBuilder.eq('user_id', filters.userId);
+  }
+  if (filters?.isPremium !== undefined) {
+    queryBuilder = queryBuilder.eq('is_premium', filters.isPremium);
   }
   if (filters?.query) {
-    query = query.ilike('title', `%${filters.query}%`);
+    queryBuilder = queryBuilder.ilike('title', `%${filters.query}%`);
   }
 
-  query = query.order('created_at', { ascending: false });
+  queryBuilder = queryBuilder.order('is_premium', { ascending: false }).order('created_at', { ascending: false });
 
-  const { data, error } = await query;
+  const { data, error } = await queryBuilder;
   if (error) throw error;
 
   return data.map(l => ({
@@ -99,13 +115,27 @@ export const getListings = async (filters?: {
     status: l.status as any,
     createdAt: l.created_at,
     updatedAt: l.updated_at,
-  } as Listing));
+    author: l.author ? {
+      displayName: l.author.display_name,
+      photoURL: l.author.photo_url,
+      isVerifiedStudent: l.author.is_verified_student,
+      trustScore: l.author.trust_score
+    } : undefined
+  } as Listing & { author: any }));
 };
 
 export const getListingById = async (id: string) => {
   const { data, error } = await supabase
     .from(LISTINGS_TABLE)
-    .select('*')
+    .select(`
+      *,
+      author:users (
+        display_name,
+        photo_url,
+        is_verified_student,
+        trust_score
+      )
+    `)
     .eq('id', id)
     .single();
 
@@ -130,5 +160,11 @@ export const getListingById = async (id: string) => {
     status: data.status as any,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
-  } as Listing;
+    author: data.author ? {
+      displayName: data.author.display_name,
+      photoURL: data.author.photo_url,
+      isVerifiedStudent: data.author.is_verified_student,
+      trustScore: data.author.trust_score
+    } : undefined
+  } as Listing & { author: any };
 };

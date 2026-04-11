@@ -11,11 +11,6 @@ import { Button } from '../components/Button';
 
 type FeedTab = 'campus' | 'trending' | 'categories';
 
-// Temporary mock authors for Feed display testing
-const mockAuthorsMap: Record<string, any> = {
-  'u123': { displayName: 'Jane Doe', photoURL: 'https://i.pravatar.cc/150?u=u123', isVerifiedStudent: true },
-};
-
 export function Feed() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<FeedTab>('campus');
@@ -165,7 +160,6 @@ export function Feed() {
             <PostCard 
               key={post.id} 
               post={post} 
-              authorsMap={mockAuthorsMap} // Mock for now
               onLikeChange={(id, count) => {
                 setPosts(prev => prev.map(p => p.id === id ? { ...p, likeCount: count } : p));
               }}

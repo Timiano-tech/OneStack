@@ -11,7 +11,6 @@ import type { Comment } from '../../types';
 
 interface CommentProps {
   comment: Comment;
-  authorsMap: Record<string, any>;
   replies: Comment[];
   postId: string;
   onCommentAdded: () => void;
@@ -20,7 +19,6 @@ interface CommentProps {
 
 export function CommentItem({
   comment,
-  authorsMap,
   replies,
   postId,
   onCommentAdded,
@@ -33,7 +31,7 @@ export function CommentItem({
   const [showActions, setShowActions] = useState(false);
 
   // Fallback author
-  const author = (comment as any).author || authorsMap[comment.userId] || {
+  const author = (comment as any).author || {
     displayName: 'Student',
   };
 
@@ -180,7 +178,6 @@ export function CommentItem({
                 <FiCornerDownRight className="absolute -left-5 top-2 text-slate-300 dark:text-slate-700" size={14} />
                 <CommentItem
                   comment={reply}
-                  authorsMap={authorsMap}
                   replies={[]} // Only allow 1 level nesting for simplicity
                   postId={postId}
                   onCommentAdded={onCommentAdded}

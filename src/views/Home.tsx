@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiSearch, FiShield, FiTrendingUp, FiMessageCircle, FiZap } from 'react-icons/fi';
@@ -6,66 +7,7 @@ import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
 import { SITE } from '../config/site';
 import type { Listing } from '../types';
-
-// Mock featured listings for demo
-const featuredListings: Listing[] = [
-  {
-    id: '1',
-    userId: 'u1',
-    type: 'sell',
-    title: 'MacBook Pro 14" M3 - Like New',
-    description: 'Barely used, with box and charger.',
-    price: 1299,
-    currency: 'USD',
-    category: 'Electronics',
-    condition: 'like_new',
-    images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400'],
-    location: 'North Campus',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: true,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    userId: 'u2',
-    type: 'service',
-    title: 'Math & Physics Tutoring',
-    description: 'Senior year student. All levels.',
-    price: 25,
-    currency: 'USD',
-    category: 'Tutoring',
-    images: ['https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400'],
-    location: 'Central Library',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: false,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    userId: 'u3',
-    type: 'sell',
-    title: 'IKEA Desk + Chair Set',
-    description: 'Moving out. Great condition.',
-    price: 120,
-    currency: 'USD',
-    category: 'Furniture',
-    condition: 'good',
-    images: ['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400'],
-    location: 'South Dorms',
-    campusId: 'c1',
-    universityId: 'uni1',
-    isPremium: false,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import { getListings } from '../services/listingService';
 
 const categories = [
   { name: 'Electronics', count: 24, slug: 'electronics' },
@@ -75,6 +17,23 @@ const categories = [
 ];
 
 export function Home() {
+  const [featuredListings, setFeaturedListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const data = await getListings({ isPremium: true });
+        setFeaturedListings(data.slice(0, 3)); // Show top 3 featured
+      } catch (err) {
+        console.error('Failed to fetch featured listings', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
   return (
     <AnimatedPage className="">
       {/* Substack-style Clean Hero */}
@@ -210,9 +169,17 @@ export function Home() {
             </Link>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredListings.map((listing, i) => (
-              <ListingCard key={listing.id} listing={listing} index={i} />
-            ))}
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="h-64 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+              ))
+            ) : featuredListings.length > 0 ? (
+              featuredListings.map((listing, i) => (
+                <ListingCard key={listing.id} listing={listing} index={i} />
+              ))
+            ) : (
+              <p className="col-span-full py-12 text-center text-slate-500">No premium listings available yet.</p>
+            )}
           </div>
         </div>
       </section>

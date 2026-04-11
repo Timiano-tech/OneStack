@@ -29,22 +29,8 @@ export function ListingDetail() {
         const data = await getListingById(id);
         if (data) {
           setListing(data);
-          
-          // Fetch seller profile
-          const { data: sellerProfile } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', data.userId)
-            .single();
-            
-          if (sellerProfile) {
-            setSeller({
-              id: sellerProfile.id,
-              displayName: sellerProfile.display_name,
-              photoURL: sellerProfile.photo_url,
-              isVerifiedStudent: sellerProfile.is_verified_student,
-              trustScore: sellerProfile.trust_score,
-            });
+          if ((data as any).author) {
+            setSeller((data as any).author);
           }
         } else {
           toast.error('Listing not found');

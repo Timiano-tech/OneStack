@@ -76,6 +76,23 @@ export function ListingCard({
                 <span className="line-clamp-1">{listing.location}</span>
               </p>
             )}
+            
+            {(listing as any).author && (
+              <div className="mt-auto pt-3 flex items-center gap-2 border-t border-slate-50 dark:border-slate-800/50">
+                <div className="h-6 w-6 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                  {(listing as any).author.photoURL ? (
+                    <img src={(listing as any).author.photoURL} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-500">
+                      {(listing as any).author.displayName?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  {(listing as any).author.displayName}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </Link>
