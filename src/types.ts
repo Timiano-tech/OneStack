@@ -1,188 +1,274 @@
-// OneStack - Campus Marketplace Types
+// OneStack — TypeScript Types (v2.1)
+// Synchronized with definitive database schema
 
 export type ListingType = 'buy' | 'sell' | 'service';
-export type Condition = 'new' | 'like_new' | 'good' | 'fair' | 'for_parts';
+export type Condition = 'new' | 'like_new' | 'good' | 'fair' | 'poor';
 
 export const LISTING_CATEGORIES = [
+  'Textbooks',
   'Electronics',
-  'Books',
   'Furniture',
   'Clothing',
-  'Sports',
+  'Housing',
+  'Tickets',
+  'Services',
+  'Free',
   'Other',
 ] as const;
 
 export const SERVICE_CATEGORIES = [
-  'Hair',
-  'Laundry',
   'Tutoring',
-  'Repairs',
-  'Design',
-  'Photography',
+  'Writing',
+  'Tech Support',
+  'Creative',
+  'Cleaning',
   'Delivery',
+  'Moving',
   'Other',
 ] as const;
 
 export type ItemCategory = (typeof LISTING_CATEGORIES)[number];
-export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number];
 
-export interface University {
-  id: string;
-  name: string;
-  country: string;
-  campuses: Campus[];
-}
+// ─── Campuses ────────────────────────────────────────────────────────────────
 
 export interface Campus {
   id: string;
   name: string;
-  universityId: string;
+  code: string;
   city?: string;
+  state?: string;
+  country: string;
+  timezone: string;
+  isActive: boolean;
 }
+
+// ─── Users & Auth ─────────────────────────────────────────────────────────────
 
 export interface User {
   id: string;
   email?: string;
-  phone?: string;
-  displayName: string;
-  photoURL?: string;
-  universityId: string;
-  campusId: string;
-  isVerifiedStudent: boolean;
+  fullName: string;
+  username: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  subscriptionTier?: 'free' | 'pro' | 'business';
+  bio?: string;
+  campusId?: string;
+  major?: string;
+  graduationYear?: number;
+  isVerified: boolean;
+  verificationType?: 'email' | 'student_id' | 'admin';
   trustScore: number;
+  isBanned: boolean;
+  notificationPreferences: {
+    push: boolean;
+    email: boolean;
+    likes: boolean;
+    comments: boolean;
+    follows: boolean;
+    messages: boolean;
+    marketplace: boolean;
+  };
+  privacySettings: {
+    profileVisibility: 'public' | 'private' | 'campus';
+    showOnlineStatus: boolean;
+    allowMessagesFrom: 'everyone' | 'followers' | 'no_one';
+  };
+  lastSeenAt?: string;
   createdAt: string;
-  role: 'user' | 'admin' | 'moderator';
+  updatedAt: string;
 }
+
+// ─── Feed & Posts ─────────────────────────────────────────────────────────────
+
+export type PostCategory = 
+  | 'Marketplace' | 'Services' | 'Deals' | 'Jobs' 
+  | 'Announcements' | 'General' | 'Question' | 'Event';
+
+export interface Post {
+  id: string;
+  userId: string;
+  campusId: string;
+  content: string;
+  images: string[];
+  category: PostCategory;
+  hashtags: string[];
+  visibility: 'campus' | 'all_campuses' | 'followers';
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
+  saveCount: number;
+  trendingScore: number;
+  isEdited: boolean;
+  editedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: Partial<User>;
+}
+
+export interface Comment {
+  id: string;
+  postId?: string;
+  listingId?: string;
+  userId: string;
+  parentCommentId?: string;
+  content: string;
+  likeCount: number;
+  replyCount: number;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author?: Partial<User>;
+  replies?: Comment[];
+}
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
 
 export interface Listing {
   id: string;
   userId: string;
-  type: ListingType;
+  campusId: string;
   title: string;
   description: string;
   price: number;
   currency: string;
-  category: ItemCategory | ServiceCategory;
+  category: ItemCategory;
   condition?: Condition;
   images: string[];
-  location: string;
-  campusId: string;
-  universityId: string;
-  isPremium: boolean;
-  status: 'active' | 'sold' | 'removed' | 'pending';
+  status: 'active' | 'sold' | 'reserved' | 'expired' | 'deleted';
+  isNegotiable: boolean;
+  meetupLocation?: string;
+  tags: string[];
+  viewCount: number;
+  inquiryCount: number;
+  expiresAt: string;
   createdAt: string;
   updatedAt: string;
-  viewCount?: number;
-  favoriteCount?: number;
+  author?: Partial<User>;
 }
+
+// ─── Chat System (Normalized) ─────────────────────────────────────────────────
 
 export interface Conversation {
   id: string;
-  participants: string[]; // User UUIDs
-  listingId?: string;
-  lastMessage?: string;
+  type: 'direct' | 'group';
+  title?: string;
+  iconUrl?: string;
+  createdBy?: string;
+  lastMessageAt: string;
   createdAt: string;
   updatedAt: string;
+  // Derived / Joined data
+  participants?: Participant[];
+  otherParticipant?: Partial<User>;
+  lastMessage?: string;
+  unreadCount?: number;
+}
+
+export interface Participant {
+  id: string;
+  conversationId: string;
+  userId: string;
+  role: 'admin' | 'member';
+  lastReadAt: string;
+  isMuted: boolean;
+  isArchived: boolean;
+  joinedAt: string;
+  // profile join
+  user?: Partial<User>;
 }
 
 export interface Message {
   id: string;
   conversationId: string;
   senderId: string;
+  replyToId?: string;
   content: string;
+  mediaUrls: string[];
+  mediaType?: 'image' | 'video' | 'file' | 'audio' | 'location';
+  isEdited: boolean;
+  isDeleted: boolean;
+  reactions: Record<string, string[]>; // emoji -> userIds
+  readBy: string[]; // userIds
+  deliveredTo: string[]; // userIds
   createdAt: string;
-  readAt?: string; // ISO string if read
+  updatedAt: string;
 }
 
-export interface Favorite {
+// ─── Stories ──────────────────────────────────────────────────────────────────
+
+export interface Story {
   id: string;
   userId: string;
-  listingId: string;
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
+  thumbnailUrl?: string;
+  caption?: string;
+  campusId: string;
+  backgroundColor: string;
+  textOverlay?: string;
+  stickerData: any[];
+  expiresAt: string;
+  viewCount: number;
+  createdAt: string;
+  author?: Partial<User>;
+  hasViewed?: boolean;
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export type NotificationType =
+  | 'like' | 'comment' | 'reply' | 'mention' | 'follow' | 'follow_request'
+  | 'message' | 'listing_sold' | 'price_drop' | 'listing_inquiry'
+  | 'story_view' | 'story_reaction' | 'welcome' | 'announcement'
+  | 'verification_approved' | 'verification_rejected';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  actorId?: string;
+  type: NotificationType;
+  entityType: 'post' | 'listing' | 'comment' | 'story' | 'user' | 'conversation' | 'review';
+  entityId?: string;
+  message: string;
+  data: any;
+  deepLink?: string;
+  readAt?: string;
+  isSeen: boolean;
+  createdAt: string;
+  actor?: Partial<User>;
+}
+
+// ─── Subscriptions ────────────────────────────────────────────────────────────
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  planTier: 'free' | 'pro' | 'business';
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'expired';
+  currentPeriodEnd: string;
+  stripeSubscriptionId?: string;
+}
+
+// ─── Social ───────────────────────────────────────────────────────────────────
+
+export interface Follow {
+  id: string;
+  followerId: string;
+  followingId: string;
   createdAt: string;
 }
 
 export interface Review {
   id: string;
-  listingId: string;
   reviewerId: string;
   revieweeId: string;
+  listingId?: string;
   rating: number;
   comment?: string;
+  aspects: Record<string, number>;
+  isAnonymous: boolean;
+  revieweeResponse?: string;
+  respondedAt?: string;
   createdAt: string;
 }
-
-export interface Report {
-  id: string;
-  reporterId: string;
-  type: 'listing' | 'user' | 'message' | 'post' | 'comment';
-  targetId: string;
-  reason: string;
-  description?: string;
-  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
-  createdAt: string;
-  reviewedBy?: string;
-  reviewedAt?: string;
-}
-
-export interface NotificationPayload {
-  type: 'message' | 'listing_activity' | 'promotion' | 'review' | 'favorite';
-  title: string;
-  body?: string;
-  data?: Record<string, string>;
-}
-
-// Feed Types
-export type PostCategory = 'Marketplace' | 'Services' | 'Deals' | 'Jobs' | 'Announcements' | 'General';
-
-export interface Post {
-  id: string;
-  userId: string;
-  campusId: string;
-  universityId: string;
-  content: string;
-  images: string[];
-  category: PostCategory;
-  hashtags: string[];
-  visibility: 'campus' | 'university' | 'public';
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  saveCount: number;
-  trendingScore: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Comment {
-  id: string;
-  postId: string;
-  userId: string;
-  parentCommentId?: string; // For nested replies
-  content: string;
-  likeCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Like {
-  id: string;
-  targetId: string; // postId or commentId
-  targetType: 'post' | 'comment';
-  userId: string;
-  createdAt: string;
-}
-
-export interface Share {
-  id: string;
-  postId: string;
-  userId: string;
-  createdAt: string;
-}
-
-export interface Save {
-  id: string;
-  postId: string;
-  userId: string;
-  createdAt: string;
-}
-

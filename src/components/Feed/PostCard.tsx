@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { FiHeart, FiMessageCircle, FiShare2, FiBookmark, FiMoreHorizontal, FiShield } from 'react-icons/fi';
+import { FiMessageCircle, FiCheckCircle, FiMoreHorizontal, FiShare2, FiBookmark } from 'react-icons/fi';
 import { formatDistanceToNow } from '../../utils/dateUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { toggleLike, checkHasLiked, toggleSavePost, checkHasSaved } from '../../services/feedService';
 import type { Post } from '../../types';
 import { toast } from '../Toast';
-import { useEffect } from 'react';
+import { LikeButton } from './LikeButton';
+import { PremiumBadge } from '../premium/PremiumBadge';
 
 interface PostCardProps {
   post: Post;
@@ -41,10 +42,9 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
     }
   }, [post.id, user]);
 
-  // Prefer author data from post, fallback to map if map provided, else empty
-  const author = (post as any).author || {
-    displayName: 'Student',
-    isVerifiedStudent: true,
+  const author = post.author || {
+    fullName: 'Student',
+    isVerified: true,
   };
 
   const handleLike = async () => {
@@ -53,7 +53,6 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
       return;
     }
 
-    // Optimistic UI
     const newLiked = !isLiked;
     const newCount = newLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
     
@@ -64,12 +63,9 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
     try {
       const result = await toggleLike(post.id, user.id);
       if (result !== newLiked) {
-        // Correct state if it differed from optimistic expectation (e.g. concurrent change)
         setIsLiked(result);
-        // We'd ideally re-fetch count here but for now just keep optimistic or sync slightly
       }
     } catch (err) {
-      // Revert on error
       setIsLiked(!newLiked);
       setLikeCount(likeCount);
       toast.error('Failed to like post.');
@@ -102,58 +98,64 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
   };
 
   const handleShare = () => {
+    const url = `${window.location.origin}/feed/post/${post.id}`;
     if (navigator.share) {
       navigator.share({
-        title: `Post by ${author.displayName}`,
+        title: `Post by ${author.fullName}`,
         text: post.content.substring(0, 100),
-        url: window.location.origin + `/feed/post/${post.id}`,
+        url,
       }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(window.location.origin + `/feed/post/${post.id}`);
-      toast.success('Link copied to clipboard!');
+      navigator.clipboard.writeText(url);
+      toast.success('Link copied!');
     }
   };
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div className="card flex flex-col rounded-2xl p-0 overflow-hidden" 
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-3">
         <Link href={`/profile/${post.userId}`} className="flex items-center gap-3">
-          <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-            {author.photoURL ? (
-              <img src={author.photoURL} alt={author.displayName} className="h-full w-full object-cover" />
+          <div className="h-10 w-10 overflow-hidden rounded-full" style={{ background: 'var(--surface-elevated)' }}>
+            {author.avatarUrl ? (
+              <img src={author.avatarUrl} alt={author.fullName} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-500">
-                {author.displayName.charAt(0).toUpperCase()}
+              <div className="flex h-full w-full items-center justify-center text-lg font-bold text-white" 
+                style={{ background: 'var(--primary)' }}>
+                {author.fullName?.charAt(0).toUpperCase() || 'S'}
               </div>
             )}
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">{author.displayName}</span>
-              {author.isVerifiedStudent && (
-                <FiShield className="text-[#D60000]" size={14} title="Verified Student" />
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>{author.fullName}</span>
+              {author.isVerified && (
+                <FiCheckCircle className="text-primary" size={13} title="Verified Student" />
               )}
+              { (post as any).isPremium && <PremiumBadge tier="pro" size="sm" /> }
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
+            <div className="mt-1 text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>
               {post.category} • {formatDistanceToNow(post.createdAt)}
             </div>
           </div>
         </Link>
-        <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-          <FiMoreHorizontal size={20} />
+        <button className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[var(--surface-elevated)]"
+          style={{ color: 'var(--text-muted)' }}>
+          <FiMoreHorizontal size={18} />
         </button>
       </div>
 
       {/* Content */}
       <div className="px-4 pb-3">
-        <p className="whitespace-pre-wrap text-[15px] text-slate-800 dark:text-slate-200">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed" style={{ color: 'var(--text)' }}>
           {post.content}
         </p>
         {post.hashtags && post.hashtags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {post.hashtags.map((tag) => (
-              <span key={tag} className="text-sm font-medium text-[#D60000] dark:text-red-400">
+              <span key={tag} className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--primary-muted)', color: 'var(--primary)' }}>
                 #{tag}
               </span>
             ))}
@@ -161,87 +163,90 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
         )}
       </div>
 
-      {/* Images */}
+      {/* Images - Instagram style carousel */}
       {post.images && post.images.length > 0 && (
-        <div className="relative mb-3 aspect-[4/5] w-full sm:aspect-video rounded-none bg-slate-100 dark:bg-slate-900">
+        <div className="relative aspect-[4/5] sm:aspect-video w-full" style={{ background: '#000' }}>
           <AnimatePresence mode="wait">
             <motion.img
               key={currentImageIdx}
               src={post.images[currentImageIdx]}
-              alt="Post media"
-              className="h-full w-full object-cover"
+              alt="Post"
+              className="h-full w-full object-contain"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             />
           </AnimatePresence>
+          
           {post.images.length > 1 && (
-            <div className="absolute top-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md">
-              {currentImageIdx + 1} / {post.images.length}
-            </div>
-          )}
-          {post.images.length > 1 && (
-            <div className="absolute inset-y-0 flex w-full items-center justify-between px-2">
+            <>
+              <div className="absolute top-3 right-3 rounded-full bg-black/50 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-md">
+                {currentImageIdx + 1}/{post.images.length}
+              </div>
+              
+              {/* Pagination dots */}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                {post.images.map((_, i) => (
+                  <div key={i} className={`h-1.5 rounded-full transition-all ${i === currentImageIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`} />
+                ))}
+              </div>
+
+              {/* Navigation Arrows */}
               <button
-                onClick={() => setCurrentImageIdx((i) => (i === 0 ? post.images.length - 1 : i - 1))}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition hover:bg-black/70"
+                onClick={(e) => { e.preventDefault(); setCurrentImageIdx((i) => (i === 0 ? post.images.length - 1 : i - 1)); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition hover:bg-black/60"
               >
                 ‹
               </button>
               <button
-                onClick={() => setCurrentImageIdx((i) => (i === post.images.length - 1 ? 0 : i + 1))}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition hover:bg-black/70"
+                onClick={(e) => { e.preventDefault(); setCurrentImageIdx((i) => (i === post.images.length - 1 ? 0 : i + 1)); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition hover:bg-black/60"
               >
                 ›
               </button>
-            </div>
+            </>
           )}
         </div>
       )}
 
-      {/* Action Bar */}
-      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700/50">
+      {/* Footer / Interaction Bar */}
+      <div className="flex items-center justify-between border-t px-4 py-3" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-6">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-              isLiked ? 'text-[#D60000]' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            <motion.div whileTap={{ scale: 0.8 }}>
-              <FiHeart size={20} fill={isLiked ? '#D60000' : 'none'} />
-            </motion.div>
-            <span>{likeCount}</span>
-          </button>
+          <LikeButton
+            isLiked={isLiked}
+            count={likeCount}
+            onToggle={handleLike}
+          />
           
           <Link
             href={`/feed/post/${post.id}`}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+            className="flex items-center gap-1.5 transition-colors hover:opacity-70"
+            style={{ color: 'var(--text-secondary)' }}
           >
             <FiMessageCircle size={20} />
-            <span>{post.commentCount}</span>
+            <span className="text-sm font-medium">{post.commentCount}</span>
           </Link>
 
           <button
             onClick={handleShare}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+            className="flex items-center gap-1.5 transition-colors hover:opacity-70"
+            style={{ color: 'var(--text-secondary)' }}
           >
             <FiShare2 size={20} />
-            <span className="hidden sm:inline">{post.shareCount}</span>
+            { post.shareCount > 0 && <span className="text-sm font-medium">{post.shareCount}</span> }
           </button>
         </div>
 
         <button
           onClick={handleSave}
-          className={`flex items-center text-sm font-medium transition-colors ${
-            isSaved ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-          }`}
+          className="flex items-center transition-all"
+          style={{ color: isSaved ? 'var(--secondary)' : 'var(--text-secondary)' }}
         >
-          <motion.div whileTap={{ scale: 0.8 }}>
+          <motion.div whileTap={{ scale: 0.8 }} className="flex items-center gap-1.5">
             <FiBookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
+            <span className="text-sm font-medium">{saveCount}</span>
           </motion.div>
-          <span className="ml-1 text-sm">{saveCount}</span>
         </button>
       </div>
     </div>

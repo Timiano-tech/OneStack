@@ -186,20 +186,20 @@ export function ListingDetail() {
                 className="flex items-center gap-3"
               >
                 <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-                  {seller.photoURL ? (
-                    <img src={seller.photoURL} alt="" className="h-full w-full object-cover" />
+                  {seller.avatarUrl ? (
+                    <img src={seller.avatarUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-500">
-                      {seller.displayName[0]}
+                      {seller.fullName?.charAt(0) || '?'}
                     </span>
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-slate-800 dark:text-slate-100">
-                      {seller.displayName}
+                      {seller.fullName}
                     </span>
-                    {seller.isVerifiedStudent && (
+                    {seller.isVerified && (
                       <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
                         Verified
                       </span>

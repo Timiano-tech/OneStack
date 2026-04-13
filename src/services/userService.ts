@@ -3,7 +3,7 @@ import type { User as AuthUser } from '@supabase/supabase-js';
 import type { User } from '../types';
 
 export const uploadImage = async (file: File, path: string): Promise<string> => {
-  const bucket = 'photos'; // Assume a 'photos' bucket exists
+  const bucket = 'photos';
   const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
     upsert: true
   });
@@ -21,7 +21,7 @@ export const syncUserToSupabase = async (authUser: AuthUser, additionalData?: Pa
     .eq('id', authUser.id)
     .single();
 
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows found"
+  if (fetchError && fetchError.code !== 'PGRST116') {
     throw fetchError;
   }
 
@@ -29,29 +29,32 @@ export const syncUserToSupabase = async (authUser: AuthUser, additionalData?: Pa
     const newUser: Partial<User> = {
       id: authUser.id,
       email: authUser.email || '',
-      displayName: authUser.user_metadata?.display_name || 'User',
-      photoURL: authUser.user_metadata?.avatar_url || '',
-      universityId: '',
+      fullName: authUser.user_metadata?.full_name || authUser.user_metadata?.display_name || 'User',
+      username: authUser.user_metadata?.username || (authUser.email ? authUser.email.split('@')[0] : 'user_' + Math.random().toString(36).slice(2, 7)),
+      avatarUrl: authUser.user_metadata?.avatar_url || '',
+      coverUrl: authUser.user_metadata?.cover_url || '',
       campusId: '',
-      isVerifiedStudent: false,
-      trustScore: 0,
+      isVerified: false,
+      subscriptionTier: 'free',
+      trustScore: 5.0,
       createdAt: new Date().toISOString(),
-      role: 'user',
+      updatedAt: new Date().toISOString(),
       ...additionalData,
     };
 
-    // Map to snake_case for DB
     const dbUser = {
       id: newUser.id,
       email: newUser.email,
-      display_name: newUser.displayName,
-      photo_url: newUser.photoURL,
-      university_id: newUser.universityId,
-      campus_id: newUser.campusId,
-      is_verified_student: newUser.isVerifiedStudent,
+      full_name: newUser.fullName,
+      username: newUser.username,
+      avatar_url: newUser.avatarUrl,
+      cover_url: newUser.coverUrl,
+      subscription_tier: newUser.subscriptionTier || 'free',
+      campus_id: newUser.campusId || null,
+      is_verified: newUser.isVerified,
       trust_score: newUser.trustScore,
-      role: newUser.role,
       created_at: newUser.createdAt,
+      updated_at: newUser.updatedAt,
     };
 
     const { error: insertError } = await supabase
@@ -63,14 +66,17 @@ export const syncUserToSupabase = async (authUser: AuthUser, additionalData?: Pa
   }
   
   if (additionalData) {
-    // Map to snake_case
     const dbUpdate: any = {};
-    if (additionalData.displayName) dbUpdate.display_name = additionalData.displayName;
-    if (additionalData.photoURL) dbUpdate.photo_url = additionalData.photoURL;
-    if (additionalData.universityId) dbUpdate.university_id = additionalData.universityId;
+    if (additionalData.fullName) dbUpdate.full_name = additionalData.fullName;
+    if (additionalData.username) dbUpdate.username = additionalData.username;
+    if (additionalData.avatarUrl) dbUpdate.avatar_url = additionalData.avatarUrl;
+    if (additionalData.coverUrl) dbUpdate.cover_url = additionalData.coverUrl;
     if (additionalData.campusId) dbUpdate.campus_id = additionalData.campusId;
-    if (additionalData.isVerifiedStudent !== undefined) dbUpdate.is_verified_student = additionalData.isVerifiedStudent;
+    if (additionalData.isVerified !== undefined) dbUpdate.is_verified = additionalData.isVerified;
     if (additionalData.trustScore !== undefined) dbUpdate.trust_score = additionalData.trustScore;
+    if (additionalData.bio) dbUpdate.bio = additionalData.bio;
+    if (additionalData.major) dbUpdate.major = additionalData.major;
+    if (additionalData.graduationYear) dbUpdate.graduation_year = additionalData.graduationYear;
 
     const { error: updateError } = await supabase
       .from('users')
@@ -79,53 +85,57 @@ export const syncUserToSupabase = async (authUser: AuthUser, additionalData?: Pa
 
     if (updateError) throw updateError;
     
-    // Return merged camelCase data
     return {
       id: userSnap.id,
       email: userSnap.email,
-      displayName: userSnap.display_name,
-      photoURL: userSnap.photo_url,
-      universityId: userSnap.university_id,
+      fullName: userSnap.full_name,
+      username: userSnap.username,
+      avatarUrl: userSnap.avatar_url,
+      coverUrl: userSnap.cover_url,
+      subscriptionTier: userSnap.subscription_tier,
       campusId: userSnap.campus_id,
-      isVerifiedStudent: userSnap.is_verified_student,
-      trustScore: userSnap.trust_score,
+      isVerified: userSnap.is_verified,
+      trustScore: Number(userSnap.trust_score),
+      bio: userSnap.bio,
+      major: userSnap.major,
+      graduationYear: userSnap.graduation_year,
       createdAt: userSnap.created_at,
-      role: userSnap.role,
+      updatedAt: userSnap.updated_at,
       ...additionalData
     } as User;
   }
 
-  // Return mapped camelCase data
   return {
     id: userSnap.id,
     email: userSnap.email,
-    displayName: userSnap.display_name,
-    photoURL: userSnap.photo_url,
-    universityId: userSnap.university_id,
+    fullName: userSnap.full_name,
+    username: userSnap.username,
+    avatarUrl: userSnap.avatar_url,
     campusId: userSnap.campus_id,
-    isVerifiedStudent: userSnap.is_verified_student,
-    trustScore: userSnap.trust_score,
+    isVerified: userSnap.is_verified,
+    trustScore: Number(userSnap.trust_score),
+    bio: userSnap.bio,
+    major: userSnap.major,
+    graduationYear: userSnap.graduation_year,
     createdAt: userSnap.created_at,
-    role: userSnap.role,
+    updatedAt: userSnap.updated_at,
   } as User;
 };
 
 export const updateUserProfileImage = async (authUser: AuthUser, file: File): Promise<string> => {
   const path = `profiles/${authUser.id}/${Date.now()}_${file.name}`;
-  const photoURL = await uploadImage(file, path);
+  const avatarUrl = await uploadImage(file, path);
   
-  // Update Auth Metadata
   await supabase.auth.updateUser({
-    data: { avatar_url: photoURL }
+    data: { avatar_url: avatarUrl }
   });
   
-  // Update Public Users table
   const { error } = await supabase
     .from('users')
-    .update({ photo_url: photoURL })
+    .update({ avatar_url: avatarUrl })
     .eq('id', authUser.id);
 
   if (error) throw error;
   
-  return photoURL;
+  return avatarUrl;
 };

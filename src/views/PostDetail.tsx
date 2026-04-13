@@ -6,7 +6,7 @@ import { PostCard } from '../components/Feed/PostCard';
 import { CommentItem } from '../components/Feed/CommentItem';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { getComments, addComment } from '../services/feedService';
+import { getComments, addComment, getPostById } from '../services/feedService';
 import { Button } from '../components/Button';
 import { toast } from '../components/Toast';
 import type { Post, Comment } from '../types';
@@ -25,33 +25,10 @@ export function PostDetail() {
   const fetchPostAndComments = useCallback(async () => {
     if (!id) return;
     try {
-      const { data: postData, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
+      const postData = await getPostById(id);
 
       if (postData) {
-        setPost({
-          id: postData.id,
-          userId: postData.user_id,
-          campusId: postData.campus_id,
-          universityId: postData.university_id,
-          content: postData.content,
-          images: postData.images,
-          category: postData.category,
-          hashtags: postData.hashtags,
-          visibility: postData.visibility,
-          likeCount: postData.like_count,
-          commentCount: postData.comment_count,
-          shareCount: postData.share_count,
-          saveCount: postData.save_count,
-          trendingScore: postData.trending_score,
-          createdAt: postData.created_at,
-          updatedAt: postData.updated_at,
-        } as Post);
+        setPost(postData);
         const fetchedComments = await getComments(id);
         setComments(fetchedComments);
       } else {
@@ -159,11 +136,11 @@ export function PostDetail() {
           <div className="border-t border-slate-100 p-4 pb-4 dark:border-slate-700/50">
             <form onSubmit={handleAddComment} className="flex gap-3">
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                {user?.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="You" className="h-full w-full object-cover" />
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="You" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center font-bold text-slate-500">
-                    {user?.user_metadata?.display_name?.charAt(0).toUpperCase() || '?'}
+                    {user?.fullName?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
               </div>

@@ -33,14 +33,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mappedProfile: UserProfile = {
         id: profile.id,
         email: profile.email,
-        displayName: profile.display_name,
-        photoURL: profile.photo_url,
-        universityId: profile.university_id,
+        fullName: profile.full_name,
+        username: profile.username,
+        avatarUrl: profile.avatar_url,
+        bio: profile.bio,
         campusId: profile.campus_id,
-        isVerifiedStudent: profile.is_verified_student,
-        trustScore: profile.trust_score,
+        major: profile.major,
+        graduationYear: profile.graduation_year,
+        isVerified: profile.is_verified,
+        trustScore: Number(profile.trust_score),
+        isBanned: profile.is_banned,
+        notificationPreferences: profile.notification_preferences,
+        privacySettings: profile.privacy_settings,
         createdAt: profile.created_at,
-        role: profile.role,
+        updatedAt: profile.updated_at,
       };
       setUser({ ...supabaseUser, ...mappedProfile });
     } else {

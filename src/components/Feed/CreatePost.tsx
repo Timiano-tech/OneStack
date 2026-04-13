@@ -19,7 +19,7 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<PostCategory | 'General'>('General');
   const [hashtagsStr, setHashtagsStr] = useState('');
-  const [visibility, setVisibility] = useState<'campus' | 'university' | 'public'>('campus');
+  const [visibility, setVisibility] = useState<'campus' | 'all_campuses' | 'followers'>('campus');
   const [images, setImages] = useState<{ file: File; url: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -70,7 +70,6 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
       await createPost({
         userId: user.id,
         campusId: user.campusId || '',
-        universityId: user.universityId || '',
         content,
         category,
         hashtags,
@@ -108,17 +107,17 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
         {/* User context top bar */}
         <div className="flex items-center gap-3">
            <div className="h-10 w-10 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className="h-full w-full object-cover" />
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-lg font-bold text-slate-500">
-                {user?.displayName?.charAt(0).toUpperCase() || '?'}
+                {user?.fullName?.charAt(0).toUpperCase() || '?'}
               </div>
             )}
           </div>
           <div className="flex-1">
             <span className="font-semibold text-slate-900 dark:text-slate-100 block text-sm">
-              {user?.displayName || 'Loading...'}
+              {user?.fullName || 'Loading...'}
             </span>
             <select
               title="Visibility"
@@ -127,8 +126,8 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
               className="mt-0.5 text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full outline-none focus:ring-2 focus:ring-[#D60000] dark:bg-slate-700 dark:text-slate-300"
             >
               <option value="campus">Campus Only</option>
-              <option value="university">University Wide</option>
-              <option value="public">Anyone</option>
+              <option value="all_campuses">University Wide</option>
+              <option value="followers">Followers</option>
             </select>
           </div>
         </div>

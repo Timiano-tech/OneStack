@@ -9,12 +9,8 @@ const HIDE_NAV_ROUTES = ['/login', '/register', '/forgot-password', '/pricing'];
 
 export function AppLayout({
   children,
-  isAuthenticated = false,
-  isAdmin = false,
 }: {
   children: React.ReactNode;
-  isAuthenticated?: boolean;
-  isAdmin?: boolean;
 }) {
   const pathname = usePathname() || '/';
   const showBottomNav = BOTTOM_NAV_ROUTES.some(
@@ -25,10 +21,7 @@ export function AppLayout({
   return (
     <>
       {showNav && (
-        <Navbar
-          isAuthenticated={isAuthenticated}
-          isAdmin={isAdmin}
-        />
+        <Navbar />
       )}
       <main
         className={`min-h-screen ${

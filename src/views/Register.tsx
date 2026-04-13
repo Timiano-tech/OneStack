@@ -28,7 +28,7 @@ export function Register() {
     email: '',
     phone: '',
     password: '',
-    displayName: '',
+    fullName: '',
     universityId: '',
     campusId: '',
   });
@@ -48,7 +48,7 @@ export function Register() {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'Enter a valid email';
     if (!form.password) next.password = 'Password is required';
     else if (form.password.length < 6) next.password = 'At least 6 characters';
-    if (!form.displayName.trim()) next.displayName = 'Name is required';
+    if (!form.fullName.trim()) next.fullName = 'Name is required';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -77,9 +77,8 @@ export function Register() {
         password: form.password,
         options: {
           data: {
-            display_name: form.displayName,
+            full_name: form.fullName,
             phone: form.phone,
-            university_id: form.universityId,
             campus_id: form.campusId,
           }
         }
@@ -90,8 +89,7 @@ export function Register() {
 
       // Sync user to our public.users table
       await syncUserToSupabase(data.user, {
-        displayName: form.displayName,
-        universityId: form.universityId,
+        fullName: form.fullName,
         campusId: form.campusId,
       });
 
@@ -197,13 +195,13 @@ export function Register() {
                   leftIcon={FiPhone}
                 />
                 <Input
-                  label="Display name"
+                  label="Full Name"
                   type="text"
-                  placeholder="How others see you"
-                  value={form.displayName}
-                  onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
+                  placeholder="Your full name"
+                  value={form.fullName}
+                  onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
                   leftIcon={FiUser}
-                  error={errors.displayName}
+                  error={errors.fullName}
                 />
                 <Input
                   label="Password"

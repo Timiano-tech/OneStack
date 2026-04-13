@@ -57,7 +57,6 @@ export async function uploadPostImages(userId: string, files: File[]): Promise<s
 export async function createPost({
   userId,
   campusId,
-  universityId,
   content,
   imageFiles,
   category,
@@ -66,29 +65,22 @@ export async function createPost({
 }: {
   userId: string;
   campusId: string;
-  universityId: string;
   content: string;
   imageFiles: File[];
-  category: PostCategory | 'General';
+  category: PostCategory;
   hashtags: string[];
-  visibility: 'campus' | 'university' | 'public';
+  visibility: 'campus' | 'all_campuses' | 'followers';
 }) {
   const imageUrls = imageFiles.length > 0 ? await uploadPostImages(userId, imageFiles) : [];
 
   const postData = {
     user_id: userId,
     campus_id: campusId,
-    university_id: universityId,
     content,
     images: imageUrls,
     category,
     hashtags,
     visibility,
-    like_count: 0,
-    comment_count: 0,
-    share_count: 0,
-    save_count: 0,
-    trending_score: 0,
   };
 
   const { data, error } = await supabase
@@ -117,11 +109,12 @@ export async function getFeedPosts({
     .select(`
       *,
       author:users (
-        display_name,
-        photo_url,
-        is_verified_student
+        full_name,
+        avatar_url,
+        is_verified
       )
-    `);
+    `)
+    .eq('is_hidden', false);
 
   if (campusId) query = query.eq('campus_id', campusId);
   if (category && category !== 'All') query = query.eq('category', category);
@@ -143,7 +136,6 @@ export async function getFeedPosts({
     id: post.id,
     userId: post.user_id,
     campusId: post.campus_id,
-    universityId: post.university_id,
     content: post.content,
     images: post.images,
     category: post.category,
@@ -153,15 +145,17 @@ export async function getFeedPosts({
     commentCount: post.comment_count,
     shareCount: post.share_count,
     saveCount: post.save_count,
-    trendingScore: post.trending_score,
+    trendingScore: Number(post.trending_score),
+    isEdited: post.is_edited,
+    editedAt: post.edited_at,
     createdAt: post.created_at,
     updatedAt: post.updated_at,
     author: post.author ? {
-      displayName: post.author.display_name,
-      photoURL: post.author.photo_url,
-      isVerifiedStudent: post.author.is_verified_student
+      fullName: post.author.full_name,
+      avatarUrl: post.author.avatar_url,
+      isVerified: post.author.is_verified
     } : undefined
-  } as any));
+  } as Post));
 
   return {
     posts,
@@ -169,74 +163,91 @@ export async function getFeedPosts({
   };
 }
 
+export async function getPostById(postId: string): Promise<Post | null> {
+  const { data: post, error } = await supabase
+    .from(POSTS_TABLE)
+    .select(`
+      *,
+      author:users (
+        full_name,
+        avatar_url,
+        is_verified
+      )
+    `)
+    .eq('id', postId)
+    .single();
+
+  if (error || !post) return null;
+
+  return {
+    id: post.id,
+    userId: post.user_id,
+    campusId: post.campus_id,
+    content: post.content,
+    images: post.images,
+    category: post.category,
+    hashtags: post.hashtags,
+    visibility: post.visibility,
+    likeCount: post.like_count,
+    commentCount: post.comment_count,
+    shareCount: post.share_count,
+    saveCount: post.save_count,
+    trendingScore: Number(post.trending_score),
+    isEdited: post.is_edited,
+    editedAt: post.edited_at,
+    createdAt: post.created_at,
+    updatedAt: post.updated_at,
+    author: post.author ? {
+      fullName: post.author.full_name,
+      avatarUrl: post.author.avatar_url,
+      isVerified: post.author.is_verified
+    } : undefined
+  } as Post;
+}
+
 export async function toggleLike(postId: string, userId: string): Promise<boolean> {
-  const likeId = `${postId}_${userId}`;
-  
-  // Check if liked
   const { data: existingLike } = await supabase
     .from(LIKES_TABLE)
     .select('*')
-    .eq('id', likeId)
-    .single();
+    .eq('post_id', postId)
+    .eq('user_id', userId)
+    .maybeSingle();
 
   if (!existingLike) {
-    // Add like
-    await supabase.from(LIKES_TABLE).insert({ id: likeId, post_id: postId, user_id: userId });
-    // Update count (Note: Not atomic without RPC)
-    const { data: post } = await supabase.from(POSTS_TABLE).select('like_count, trending_score').eq('id', postId).single();
-    await supabase.from(POSTS_TABLE).update({ 
-      like_count: (post?.like_count || 0) + 1,
-      trending_score: (post?.trending_score || 0) + 2
-    }).eq('id', postId);
+    // Add like - DB trigger handle_post_like handles counts
+    await supabase.from(LIKES_TABLE).insert({ post_id: postId, user_id: userId });
     return true;
   } else {
-    // Remove like
-    await supabase.from(LIKES_TABLE).delete().eq('id', likeId);
-    // Update count
-    const { data: post } = await supabase.from(POSTS_TABLE).select('like_count, trending_score').eq('id', postId).single();
-    await supabase.from(POSTS_TABLE).update({ 
-      like_count: Math.max(0, (post?.like_count || 0) - 1),
-      trending_score: (post?.trending_score || 0) - 2
-    }).eq('id', postId);
+    // Remove like - DB trigger handle_post_like handles counts
+    await supabase.from(LIKES_TABLE).delete().eq('post_id', postId).eq('user_id', userId);
     return false;
   }
 }
 
 export async function checkHasLiked(postId: string, userId: string): Promise<boolean> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from(LIKES_TABLE)
     .select('*')
     .eq('post_id', postId)
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   
   return !!data;
 }
 
 export async function toggleSavePost(postId: string, userId: string): Promise<boolean> {
-  const saveId = `${postId}_${userId}`;
-  
   const { data: existingSave } = await supabase
     .from(SAVES_TABLE)
     .select('*')
-    .eq('id', saveId)
-    .single();
+    .eq('post_id', postId)
+    .eq('user_id', userId)
+    .maybeSingle();
 
   if (!existingSave) {
-    await supabase.from(SAVES_TABLE).insert({ id: saveId, post_id: postId, user_id: userId });
-    const { data: post } = await supabase.from(POSTS_TABLE).select('save_count, trending_score').eq('id', postId).single();
-    await supabase.from(POSTS_TABLE).update({ 
-      save_count: (post?.save_count || 0) + 1,
-      trending_score: (post?.trending_score || 0) + 5
-    }).eq('id', postId);
+    await supabase.from(SAVES_TABLE).insert({ post_id: postId, user_id: userId });
     return true;
   } else {
-    await supabase.from(SAVES_TABLE).delete().eq('id', saveId);
-    const { data: post } = await supabase.from(POSTS_TABLE).select('save_count, trending_score').eq('id', postId).single();
-    await supabase.from(POSTS_TABLE).update({ 
-      save_count: Math.max(0, (post?.save_count || 0) - 1),
-      trending_score: (post?.trending_score || 0) - 5
-    }).eq('id', postId);
+    await supabase.from(SAVES_TABLE).delete().eq('post_id', postId).eq('user_id', userId);
     return false;
   }
 }
@@ -247,7 +258,7 @@ export async function checkHasSaved(postId: string, userId: string): Promise<boo
     .select('*')
     .eq('post_id', postId)
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   
   return !!data;
 }
@@ -258,7 +269,6 @@ export async function addComment(postId: string, userId: string, content: string
     user_id: userId,
     parent_comment_id: parentCommentId || null,
     content,
-    like_count: 0,
   };
 
   const { data: comment, error } = await supabase
@@ -268,14 +278,7 @@ export async function addComment(postId: string, userId: string, content: string
     .single();
 
   if (error) throw error;
-
-  // Update post comment count
-  const { data: post } = await supabase.from(POSTS_TABLE).select('comment_count, trending_score').eq('id', postId).single();
-  await supabase.from(POSTS_TABLE).update({
-    comment_count: (post?.comment_count || 0) + 1,
-    trending_score: (post?.trending_score || 0) + 3,
-  }).eq('id', postId);
-
+  // DB trigger on_post_comment handles counts
   return comment.id;
 }
 
@@ -285,9 +288,9 @@ export async function getComments(postId: string) {
     .select(`
       *,
       author:users (
-        display_name,
-        photo_url,
-        is_verified_student
+        full_name,
+        avatar_url,
+        is_verified
       )
     `)
     .eq('post_id', postId)
@@ -302,14 +305,16 @@ export async function getComments(postId: string) {
     parentCommentId: comment.parent_comment_id,
     content: comment.content,
     likeCount: comment.like_count,
+    replyCount: comment.reply_count,
+    isEdited: comment.is_edited,
     createdAt: comment.created_at,
     updatedAt: comment.updated_at,
     author: comment.author ? {
-      displayName: comment.author.display_name,
-      photoURL: comment.author.photo_url,
-      isVerifiedStudent: comment.author.is_verified_student
+      fullName: comment.author.full_name,
+      avatarUrl: comment.author.avatar_url,
+      isVerified: comment.author.is_verified
     } : undefined
-  } as any));
+  } as Comment));
 }
 
 export async function deletePost(postId: string, _userId: string) {
@@ -321,23 +326,17 @@ export async function deletePost(postId: string, _userId: string) {
   if (error) throw error;
 }
 
-export async function deleteComment(commentId: string, postId: string) {
+export async function deleteComment(commentId: string, _postId: string) {
   await supabase.from(COMMENTS_TABLE).delete().eq('id', commentId);
-  
-  const { data: post } = await supabase.from(POSTS_TABLE).select('comment_count, trending_score').eq('id', postId).single();
-  await supabase.from(POSTS_TABLE).update({
-    comment_count: Math.max(0, (post?.comment_count || 0) - 1),
-    trending_score: (post?.trending_score || 0) - 3,
-  }).eq('id', postId);
 }
 
-export async function reportContent(reporterId: string, targetId: string, type: 'post' | 'comment', reason: string, description: string = '') {
+export async function reportContent(reporterId: string, targetId: string, targetType: 'post' | 'comment' | 'listing' | 'user' | 'story', reason: string, description: string = '') {
   const { error } = await supabase
     .from(REPORTS_TABLE)
     .insert({
       reporter_id: reporterId,
       target_id: targetId,
-      type,
+      target_type: targetType,
       reason,
       description,
       status: 'pending',

@@ -31,8 +31,8 @@ export function CommentItem({
   const [showActions, setShowActions] = useState(false);
 
   // Fallback author
-  const author = (comment as any).author || {
-    displayName: 'Student',
+  const author = comment.author || {
+    fullName: 'Student',
   };
 
   const handleReplySubmit = async (e: FormEvent) => {
@@ -70,11 +70,11 @@ export function CommentItem({
     <div className="flex gap-3">
       {/* Avatar */}
       <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 mt-1">
-        {author.photoURL ? (
-          <img src={author.photoURL} alt={author.displayName} className="h-full w-full object-cover" />
+        {author.avatarUrl ? (
+          <img src={author.avatarUrl} alt={author.fullName} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-sm font-bold text-slate-500">
-            {author.displayName?.charAt(0).toUpperCase()}
+            {author.fullName?.charAt(0).toUpperCase() || 'S'}
           </div>
         )}
       </div>
@@ -84,22 +84,22 @@ export function CommentItem({
         <div className="rounded-2xl bg-slate-100 p-3 pb-2.5 dark:bg-slate-800">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              {author.displayName}
+              {author.fullName}
             </span>
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowActions(!showActions)}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
               >
                 <FiMoreHorizontal size={16} />
               </button>
-              
+
               <AnimatePresence>
                 {showActions && (
                   <>
-                    <div 
+                    <div
                       className="fixed inset-0 z-10"
-                      onClick={() => setShowActions(false)} 
+                      onClick={() => setShowActions(false)}
                     />
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -131,7 +131,7 @@ export function CommentItem({
           </div>
           <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{comment.content}</p>
         </div>
-        
+
         <div className="flex items-center gap-4 px-2 pt-1">
           <span className="text-xs text-slate-500 dark:text-slate-400">
             {formatDistanceToNow(comment.createdAt)}
@@ -158,7 +158,7 @@ export function CommentItem({
                   type="text"
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder={`Reply to ${author.displayName}...`}
+                  placeholder={`Reply to ${author.fullName}...`}
                   autoFocus
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[#D60000] focus:outline-none focus:ring-1 focus:ring-[#D60000] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 />

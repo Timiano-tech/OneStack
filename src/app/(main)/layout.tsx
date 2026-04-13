@@ -15,7 +15,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   if (!mounted) return null;
 
   return (
-    <AppLayout isAuthenticated={!!user} isAdmin={false}>
+    <AppLayout>
       {children}
     </AppLayout>
   );

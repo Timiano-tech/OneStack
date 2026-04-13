@@ -1,61 +1,73 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { FiHome, FiGrid, FiPlusCircle, FiMessageCircle, FiUser } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiHome, FiGrid, FiPlus, FiMessageCircle, FiUser } from 'react-icons/fi';
 
 const tabs = [
   { to: '/', label: 'Home', icon: FiHome },
   { to: '/feed', label: 'Feed', icon: FiGrid },
-  { to: '/listing/create', label: 'Sell', icon: FiPlusCircle, primary: true },
+  { to: '/listing/create', label: 'Sell', icon: FiPlus, primary: true },
   { to: '/chat', label: 'Chat', icon: FiMessageCircle },
   { to: '/profile', label: 'Profile', icon: FiUser },
 ];
 
 export function BottomNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 shadow-[0_-4px_25px_-5px_rgba(0,0,0,0.05)] dark:bg-[#09090b] dark:border-slate-800/80 md:hidden"
-      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      className="fixed bottom-0 left-0 right-0 z-50 glass-nav border-t md:hidden safe-area-bottom"
+      style={{ borderColor: 'var(--border)' }}
     >
-      <div className="flex items-center justify-around">
+      <div className="flex items-center justify-around px-2 py-1">
         {tabs.map(({ to, label, icon: Icon, primary }) => {
-          const active =
-            to === '/'
-              ? pathname === '/'
-              : pathname === to || pathname?.startsWith(to + '/');
+          const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
+          
           return (
             <Link
               key={to}
               href={to}
-              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2 pt-3 text-center"
+              className="relative flex flex-1 flex-col items-center justify-center py-2"
             >
               {primary ? (
-                <motion.span
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-soft"
-                  whileTap={{ scale: 0.92 }}
+                <motion.div
+                  className="flex h-12 w-12 -mt-6 items-center justify-center rounded-2xl shadow-lg"
+                  style={{ 
+                    background: 'var(--primary)', 
+                    color: 'white',
+                    boxShadow: 'var(--shadow-blue)'
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <Icon size={24} />
-                </motion.span>
+                  <Icon size={24} strokeWidth={3} />
+                </motion.div>
               ) : (
-                <span
-                  className={`flex items-center justify-center rounded-xl p-2 transition-colors ${
-                    active
-                      ? 'text-accent dark:text-red-400'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
-                  <Icon size={24} />
-                </span>
+                <div className="relative flex flex-col items-center gap-0.5">
+                  <motion.span
+                    className="relative z-10 p-1.5 transition-colors"
+                    style={{ color: active ? 'var(--primary)' : 'var(--text-muted)' }}
+                    animate={{ scale: active ? 1.1 : 1 }}
+                  >
+                    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+                  </motion.span>
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-tighter"
+                    style={{ color: active ? 'var(--primary)' : 'var(--text-muted)' }}
+                  >
+                    {label}
+                  </span>
+                  
+                  {active && (
+                    <motion.div
+                      layoutId="bottomNavDot"
+                      className="absolute -top-1 h-1 w-1 rounded-full"
+                      style={{ background: 'var(--primary)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </div>
               )}
-              <span
-                className={`text-[10px] font-medium ${
-                  active ? 'text-accent dark:text-red-400' : 'text-slate-500 dark:text-slate-400'
-                } ${primary ? 'mt-0' : ''}`}
-              >
-                {label}
-              </span>
             </Link>
           );
         })}

@@ -1,67 +1,114 @@
+'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FiStar, FiSettings, FiLogOut, FiZap } from 'react-icons/fi';
+import { FiLogOut, FiZap, FiGrid, FiList, FiUserPlus, FiUserCheck } from 'react-icons/fi';
+import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation';
 import { AnimatedPage } from '../components/AnimatedPage';
 import { Button } from '../components/Button';
 import { ListingCard } from '../components/ListingCard';
+import { ProfileHeader } from '../components/profile/ProfileHeader';
+import { TrustScoreBadge } from '../components/profile/TrustScoreBadge';
+import { EditProfileModal } from '../components/profile/EditProfileModal';
+import { UpgradeModal } from '../components/premium/UpgradeModal';
+import { ProfileHeaderSkeleton, ListingCardSkeleton } from '../components/ui/SkeletonLoader';
 import type { User, Listing } from '../types';
 import { toast } from '../components/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { syncUserToSupabase, updateUserProfileImage } from '../services/userService';
 import { getListings } from '../services/listingService';
+import { getFollowerCount, getFollowingCount, isFollowing, follow, unfollow } from '../services/followService';
+import { getUserReviews } from '../services/reviewService';
+import { containerVariants, itemVariants } from '../lib/animations';
+
+type ProfileTab = 'listings' | 'reviews';
 
 export function Profile() {
   const { user: authUser, logout } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'listings' | 'favorites'>('listings');
+  const params = useParams();
+  // When used as /profile, userId is own user; when /profile/[userId] it could be someone else
+  const profileUserId = (params?.userId as string) || authUser?.id;
+  const isOwn = !params?.userId || params?.userId === authUser?.id;
+
+  const [activeTab, setActiveTab] = useState<ProfileTab>('listings');
   const [dbUser, setDbUser] = useState<User | null>(null);
   const [myListings, setMyListings] = useState<Listing[]>([]);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowingUser, setIsFollowingUser] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [viewModeGrid, setViewModeGrid] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
-    if (authUser) {
-      const initProfile = async () => {
-        try {
-          // syncUserToSupabase expects supabase.User as first arg. 
-          // AuthContext's user is (User & UserProfile), which includes the fields needed.
-          const userProfile = await syncUserToSupabase(authUser as any);
-          setDbUser(userProfile);
-          
-          // Fetch user's listings
-          const listings = await getListings({ userId: authUser.id } as any);
-          // Note: added userId to getListings filter in my head, I should ensure listingService supports it.
-          // Let me check listingService.ts or just use the generic one.
-          setMyListings(listings);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
+    if (!profileUserId) { setLoading(false); return; }
+    const init = async () => {
+      try {
+        const userProfile = await syncUserToSupabase(authUser as any);
+        setDbUser(userProfile);
+        const [listings, followers, following, reviews_data] = await Promise.all([
+          getListings({ userId: profileUserId } as any),
+          getFollowerCount(profileUserId),
+          getFollowingCount(profileUserId),
+          getUserReviews(profileUserId),
+        ]);
+        setMyListings(listings);
+        setFollowerCount(followers);
+        setFollowingCount(following);
+        setReviews(reviews_data);
+
+        if (authUser && !isOwn) {
+          const following_status = await isFollowing(authUser.id, profileUserId);
+          setIsFollowingUser(following_status);
         }
-      };
-      initProfile();
-    } else {
-      setLoading(false);
-    }
-  }, [authUser]);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
+    };
+    init();
+  }, [profileUserId, authUser, isOwn]);
 
-  if (loading) {
-    return (
-      <AnimatedPage className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
-      </AnimatedPage>
-    );
-  }
+  const handleFollowToggle = async () => {
+    if (!authUser || !profileUserId) return;
+    setFollowLoading(true);
+    try {
+      if (isFollowingUser) {
+        await unfollow(authUser.id, profileUserId);
+        setFollowerCount(c => c - 1);
+        setIsFollowingUser(false);
+      } else {
+        await follow(authUser.id, profileUserId);
+        setFollowerCount(c => c + 1);
+        setIsFollowingUser(true);
+      }
+    } catch { toast.error('Failed to update follow'); }
+    finally { setFollowLoading(false); }
+  };
 
-  if (!authUser) {
+  const handleAvatarUpload = async (file: File) => {
+    if (!authUser) return;
+    try {
+      const url = await updateUserProfileImage(authUser as any, file);
+      setDbUser(prev => prev ? { ...prev, avatarUrl: url } : null);
+      toast.success('Photo updated!');
+    } catch { toast.error('Upload failed'); }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  if (!authUser && !loading) {
     return (
-      <AnimatedPage className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-900">
+      <AnimatedPage className="flex min-h-screen items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Profile</h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">
-            Sign in to view your profile and listings.
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>Profile</h1>
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Sign in to view your profile.
           </p>
           <Link href="/login" className="mt-4 inline-block">
             <Button>Sign in</Button>
@@ -71,191 +118,234 @@ export function Profile() {
     );
   }
 
-  const displayUser = {
-    displayName: dbUser?.displayName || authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || 'User',
-    email: authUser.email,
-    photoURL: dbUser?.photoURL || authUser.user_metadata?.avatar_url || '',
-    isVerifiedStudent: dbUser?.isVerifiedStudent ?? false,
-    trustScore: dbUser?.trustScore ?? 0,
+  const displayUser: User = dbUser || {
+    id: authUser?.id || '',
+    fullName: authUser?.user_metadata?.full_name || authUser?.email?.split('@')[0] || 'User',
+    avatarUrl: authUser?.user_metadata?.avatar_url || '',
+    username: authUser?.user_metadata?.username || '',
+    email: authUser?.email || '',
+    isVerified: false,
+    trustScore: 0,
+    universityId: '',
+    campusId: '',
+    createdAt: '',
+    updatedAt: '',
+    role: 'user',
+    bio: '',
+    major: '',
+    gradYear: '',
+    interests: [],
+    socialLinks: {},
+    privacySettings: {
+      showEmail: false,
+      showActivity: true,
+      allowMessages: 'everyone'
+    },
+    subscriptionTier: 'free'
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image is too large (max 5MB)');
-      return;
-    }
-
-    setUploadingImage(true);
-    try {
-      const url = await updateUserProfileImage(authUser as any, file);
-      setDbUser(prev => prev ? { ...prev, photoURL: url } : null);
-      toast.success('Profile picture updated!');
-    } catch (error: any) {
-      toast.error('Failed to upload image. ' + error.message);
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/login');
-    } catch {
-      toast.error('Failed to log out.');
-    }
-  };
+  const followButton = (
+    <motion.button
+      onClick={handleFollowToggle}
+      disabled={followLoading}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+      style={{ background: isFollowingUser ? 'var(--surface-elevated)' : 'var(--primary)', color: isFollowingUser ? 'var(--text)' : 'white', border: '1px solid var(--border)' }}
+    >
+      {isFollowingUser ? <><FiUserCheck size={15} /> Following</> : <><FiUserPlus size={15} /> Follow</>}
+    </motion.button>
+  );
 
   return (
-    <AnimatedPage className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="mx-auto max-w-3xl px-4 py-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <div className="flex items-center gap-4">
-            <div className="relative h-20 w-20 shrink-0">
-               <div className="h-full w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-600">
-                  {uploadingImage ? (
-                    <span className="flex h-full w-full items-center justify-center text-xs font-medium text-slate-500">
-                      ...
-                    </span>
-                  ) : displayUser.photoURL ? (
-                    <img src={displayUser.photoURL} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-slate-500">
-                      {displayUser.displayName?.[0]}
-                    </span>
-                  )}
-               </div>
-               
-               <label
-                  htmlFor="profile-upload"
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-100 text-slate-600 shadow-sm transition-colors hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
-                  aria-label="Upload profile picture"
-               >
-                 <span className="text-xl leading-none -mt-1">+</span>
-                 <input
-                   id="profile-upload"
-                   type="file"
-                   accept="image/jpeg,image/png,image/webp"
-                   className="hidden"
-                   onChange={handleImageUpload}
-                   disabled={uploadingImage}
-                 />
-               </label>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                  {displayUser.displayName}
-                </h1>
-                {displayUser.isVerifiedStudent && (
-                  <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
-                    Verified
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{displayUser.email}</p>
-              <p className="mt-1 flex items-center gap-1 text-sm text-amber-600 dark:text-amber-400">
-                <FiStar size={16} />
-                {displayUser.trustScore} seller rating
-              </p>
-            </div>
-            <Link href="/profile/settings">
-              <Button variant="ghost" leftIcon={FiSettings} aria-label="Settings">
-                Settings
-              </Button>
-            </Link>
+    <AnimatedPage className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      {loading ? (
+        <ProfileHeaderSkeleton />
+      ) : (
+        <ProfileHeader
+          user={displayUser}
+          isOwn={isOwn}
+          followerCount={followerCount}
+          followingCount={followingCount}
+          listingCount={myListings.length}
+          onEditClick={() => setEditOpen(true)}
+          onAvatarUpload={handleAvatarUpload}
+          followButton={!isOwn ? followButton : undefined}
+        />
+      )}
+
+      <div className="mx-auto max-w-3xl px-4 pb-8">
+        {/* Trust score */}
+        {!loading && (
+          <div className="mt-3 flex items-center gap-2">
+            <TrustScoreBadge score={displayUser.trustScore} reviewCount={reviews.length} />
           </div>
-        </div>
+        )}
 
-        <Link
-          href="/pricing"
-          className="mt-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20"
-        >
-          <span className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
-            <FiZap size={18} />
-            Upgrade to Premium — unlimited listings & boosts
-          </span>
-          <span className="text-xs text-amber-600 dark:text-amber-400">→</span>
-        </Link>
-
-        <div className="mt-6 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('listings')}
-            className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
-              activeTab === 'listings'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
-            }`}
+        {/* Upgrade banner (own profile, not premium) */}
+        {isOwn && (!dbUser?.subscriptionTier || dbUser.subscriptionTier === 'free') && (
+          <motion.button
+            onClick={() => setUpgradeOpen(true)}
+            className="mt-4 flex w-full items-center justify-between rounded-xl px-4 py-3 text-left"
+            style={{
+              background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(245,158,11,0.06))',
+              border: '1px solid rgba(245,158,11,0.3)',
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
-            My listings
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('favorites')}
-            className={`flex-1 rounded-xl py-3 text-sm font-medium transition-colors ${
-              activeTab === 'favorites'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
-            }`}
-          >
-            Favorites
-          </button>
-        </div>
+            <span className="flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--secondary)' }}>
+              <FiZap size={16} />
+              Upgrade to Premium — unlimited listings & visibility boosts
+            </span>
+            <span className="text-xs" style={{ color: 'var(--secondary)' }}>→</span>
+          </motion.button>
+        )}
 
-        <div className="mt-6">
-          {activeTab === 'listings' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
+        {/* Tabs */}
+        <div className="mt-5 flex items-center gap-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          {[
+            { id: 'listings', label: 'Listings' },
+            { id: 'reviews', label: `Reviews (${reviews.length})` },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as ProfileTab)}
+              className="relative pb-3 text-sm font-medium transition-colors"
+              style={{ color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)' }}
             >
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-slate-800 dark:text-slate-100">
-                  Your listings
-                </h2>
-                <Link href="/listing/create">
-                  <Button size="sm">New listing</Button>
-                </Link>
-              </div>
-              {myListings.length === 0 ? (
-                <p className="py-8 text-center text-slate-500 dark:text-slate-400">
-                  No listings yet. Create one to start selling.
-                </p>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {myListings.map((listing, i) => (
-                    <ListingCard key={listing.id} listing={listing} index={i} />
-                  ))}
-                </div>
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div layoutId="profileTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full"
+                  style={{ background: 'var(--primary)' }} />
               )}
-            </motion.div>
-          )}
-          {activeTab === 'favorites' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
-              <h2 className="font-semibold text-slate-800 dark:text-slate-100">
-                Saved items
-              </h2>
-              <p className="py-8 text-center text-slate-500 dark:text-slate-400">
-                No favorites yet. Browse listings and tap the heart to save.
-              </p>
-            </motion.div>
+            </button>
+          ))}
+
+          {/* Grid/List toggle for listings */}
+          {activeTab === 'listings' && (
+            <div className="ml-auto flex items-center gap-1 rounded-xl p-1" style={{ background: 'var(--surface-elevated)' }}>
+              <button onClick={() => setViewModeGrid(true)}
+                className="rounded-lg p-1.5 transition-colors"
+                style={{ background: viewModeGrid ? 'var(--primary)' : 'transparent', color: viewModeGrid ? 'white' : 'var(--text-muted)' }}>
+                <FiGrid size={14} />
+              </button>
+              <button onClick={() => setViewModeGrid(false)}
+                className="rounded-lg p-1.5 transition-colors"
+                style={{ background: !viewModeGrid ? 'var(--primary)' : 'transparent', color: !viewModeGrid ? 'white' : 'var(--text-muted)' }}>
+                <FiList size={14} />
+              </button>
+            </div>
           )}
         </div>
 
-        <div className="mt-8">
-          <Button variant="ghost" fullWidth leftIcon={FiLogOut} className="text-red-600" onClick={handleLogout}>
-            Sign out
-          </Button>
+        {/* Tab content */}
+        <div className="mt-5">
+          {activeTab === 'listings' && (
+            loading ? (
+              <div className={viewModeGrid ? 'grid gap-4 sm:grid-cols-2' : 'space-y-3'}>
+                {[...Array(4)].map((_, i) => <ListingCardSkeleton key={i} />)}
+              </div>
+            ) : (
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className={viewModeGrid ? 'grid gap-4 sm:grid-cols-2' : 'space-y-3'}
+              >
+                {myListings.length === 0 ? (
+                  <div className="col-span-full py-12 text-center">
+                    <div className="text-4xl mb-3">🛍️</div>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                      No listings yet.
+                      {isOwn && ' Create one to start selling!'}
+                    </p>
+                    {isOwn && (
+                      <Link href="/listing/create">
+                        <button className="mt-3 rounded-full px-4 py-2 text-sm font-medium text-white"
+                          style={{ background: 'var(--primary)' }}>
+                          Create listing
+                        </button>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  myListings.map((listing, i) => (
+                    <motion.div key={listing.id} variants={itemVariants}>
+                      <ListingCard listing={listing} index={i} />
+                    </motion.div>
+                  ))
+                )}
+              </motion.div>
+            )
+          )}
+
+          {activeTab === 'reviews' && (
+            reviews.length === 0 ? (
+              <div className="py-12 text-center">
+                <div className="text-4xl mb-3">⭐</div>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No reviews yet</p>
+              </div>
+            ) : (
+              <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-3">
+                {reviews.map((review: any) => (
+                  <motion.div key={review.id} variants={itemVariants}
+                    className="rounded-2xl p-4"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-9 w-9 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-elevated)' }}>
+                        {review.reviewer?.avatarUrl
+                          ? <img src={review.reviewer.avatarUrl} alt="" className="h-full w-full object-cover" />
+                          : <div className="flex h-full w-full items-center justify-center font-bold text-sm" style={{ color: 'var(--text-muted)' }}>
+                              {review.reviewer?.fullName?.charAt(0) || '?'}
+                            </div>
+                        }
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                          {review.reviewer?.fullName || 'Anonymous'}
+                        </p>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <span key={s} className="text-xs">{s <= review.rating ? '⭐' : '☆'}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{review.comment}</p>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )
+          )}
         </div>
+
+        {/* Sign out (own profile) */}
+        {isOwn && (
+          <div className="mt-8">
+            <Button variant="ghost" fullWidth leftIcon={FiLogOut} className="text-red-500" onClick={handleLogout}>
+              Sign out
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <EditProfileModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => window.location.reload()}
+        initialValues={{
+          fullName: displayUser.fullName,
+          bio: displayUser.bio,
+          major: displayUser.major,
+          gradYear: displayUser.gradYear,
+        }}
+      />
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </AnimatedPage>
   );
 }

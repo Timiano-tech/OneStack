@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { Listing, ListingType, ItemCategory, ServiceCategory, Condition } from '../types';
+import type { Listing, ItemCategory, Condition } from '../types';
 
 const LISTINGS_TABLE = 'listings';
 
@@ -21,7 +21,7 @@ export const uploadListingImages = async (userId: string, files: File[]): Promis
   return urls;
 };
 
-export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>, imageFiles?: File[]) => {
+export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt' | 'viewCount' | 'inquiryCount'>, imageFiles?: File[]) => {
   let imageUrls = listingData.images;
   if (imageFiles && imageFiles.length > 0) {
     const uploaded = await uploadListingImages(listingData.userId, imageFiles);
@@ -30,7 +30,7 @@ export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt
 
   const dbData = {
     user_id: listingData.userId,
-    type: listingData.type,
+    campus_id: listingData.campusId,
     title: listingData.title,
     description: listingData.description,
     price: listingData.price,
@@ -38,11 +38,11 @@ export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt
     category: listingData.category,
     condition: listingData.condition,
     images: imageUrls,
-    location: listingData.location,
-    campus_id: listingData.campusId,
-    university_id: listingData.universityId,
-    is_premium: listingData.isPremium,
     status: listingData.status,
+    is_negotiable: listingData.isNegotiable,
+    meetup_location: listingData.meetupLocation,
+    tags: listingData.tags,
+    expires_at: listingData.expiresAt,
   };
 
   const { data, error } = await supabase
@@ -57,18 +57,17 @@ export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt
 
 export const getListings = async (filters?: {
   category?: string;
-  type?: ListingType;
   campusId?: string;
   userId?: string;
   query?: string;
-  isPremium?: boolean;
+  status?: string;
 }) => {
   let queryBuilder = supabase.from(LISTINGS_TABLE).select(`
     *,
     author:users (
-      display_name,
-      photo_url,
-      is_verified_student,
+      full_name,
+      avatar_url,
+      is_verified,
       trust_score
     )
   `);
@@ -76,23 +75,20 @@ export const getListings = async (filters?: {
   if (filters?.category && filters.category !== 'All') {
     queryBuilder = queryBuilder.eq('category', filters.category);
   }
-  if (filters?.type) {
-    queryBuilder = queryBuilder.eq('type', filters.type);
-  }
   if (filters?.campusId) {
     queryBuilder = queryBuilder.eq('campus_id', filters.campusId);
   }
   if (filters?.userId) {
     queryBuilder = queryBuilder.eq('user_id', filters.userId);
   }
-  if (filters?.isPremium !== undefined) {
-    queryBuilder = queryBuilder.eq('is_premium', filters.isPremium);
-  }
   if (filters?.query) {
     queryBuilder = queryBuilder.ilike('title', `%${filters.query}%`);
   }
+  
+  // Default to active unless specified
+  queryBuilder = queryBuilder.eq('status', filters?.status || 'active');
 
-  queryBuilder = queryBuilder.order('is_premium', { ascending: false }).order('created_at', { ascending: false });
+  queryBuilder = queryBuilder.order('created_at', { ascending: false });
 
   const { data, error } = await queryBuilder;
   if (error) throw error;
@@ -100,7 +96,7 @@ export const getListings = async (filters?: {
   return data.map(l => ({
     id: l.id,
     userId: l.user_id,
-    type: l.type,
+    campusId: l.campus_id,
     title: l.title,
     description: l.description,
     price: Number(l.price),
@@ -108,18 +104,20 @@ export const getListings = async (filters?: {
     category: l.category as any,
     condition: l.condition as any,
     images: l.images,
-    location: l.location,
-    campusId: l.campus_id,
-    universityId: l.university_id,
-    isPremium: l.is_premium,
     status: l.status as any,
+    isNegotiable: l.is_negotiable,
+    meetupLocation: l.meetup_location,
+    tags: l.tags,
+    viewCount: l.view_count,
+    inquiryCount: l.inquiry_count,
+    expiresAt: l.expires_at,
     createdAt: l.created_at,
     updatedAt: l.updated_at,
     author: l.author ? {
-      displayName: l.author.display_name,
-      photoURL: l.author.photo_url,
-      isVerifiedStudent: l.author.is_verified_student,
-      trustScore: l.author.trust_score
+      fullName: l.author.full_name,
+      avatarUrl: l.author.avatar_url,
+      isVerified: l.author.is_verified,
+      trustScore: Number(l.author.trust_score)
     } : undefined
   } as Listing & { author: any }));
 };
@@ -130,9 +128,9 @@ export const getListingById = async (id: string) => {
     .select(`
       *,
       author:users (
-        display_name,
-        photo_url,
-        is_verified_student,
+        full_name,
+        avatar_url,
+        is_verified,
         trust_score
       )
     `)
@@ -145,7 +143,7 @@ export const getListingById = async (id: string) => {
   return {
     id: data.id,
     userId: data.user_id,
-    type: data.type,
+    campusId: data.campus_id,
     title: data.title,
     description: data.description,
     price: Number(data.price),
@@ -153,18 +151,20 @@ export const getListingById = async (id: string) => {
     category: data.category as any,
     condition: data.condition as any,
     images: data.images,
-    location: data.location,
-    campusId: data.campus_id,
-    universityId: data.university_id,
-    isPremium: data.is_premium,
     status: data.status as any,
+    isNegotiable: data.is_negotiable,
+    meetupLocation: data.meetup_location,
+    tags: data.tags,
+    viewCount: data.view_count,
+    inquiryCount: data.inquiry_count,
+    expiresAt: data.expires_at,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
     author: data.author ? {
-      displayName: data.author.display_name,
-      photoURL: data.author.photo_url,
-      isVerifiedStudent: data.author.is_verified_student,
-      trustScore: data.author.trust_score
+      fullName: data.author.full_name,
+      avatarUrl: data.author.avatar_url,
+      isVerified: data.author.is_verified,
+      trustScore: Number(data.author.trust_score)
     } : undefined
   } as Listing & { author: any };
 };
