@@ -41,17 +41,16 @@ export async function globalSearch(query: string): Promise<SearchResults> {
           id: p.id,
           userId: p.user_id,
           campusId: p.campus_id,
-          universityId: p.university_id,
           content: p.content,
           images: p.images,
           category: p.category,
           hashtags: p.hashtags,
           visibility: p.visibility,
-          likeCount: p.like_count,
-          commentCount: p.comment_count,
-          shareCount: p.share_count,
-          saveCount: p.save_count,
-          trendingScore: p.trending_score,
+          likeCount: p.like_count || 0,
+          commentCount: p.comment_count || 0,
+          shareCount: p.share_count || 0,
+          saveCount: p.save_count || 0,
+          trendingScore: Number(p.trending_score) || 0,
           createdAt: p.created_at,
           updatedAt: p.updated_at,
           author: p.author
@@ -65,23 +64,20 @@ export async function globalSearch(query: string): Promise<SearchResults> {
       ? listingsResult.value.data.map((l: any) => ({
           id: l.id,
           userId: l.user_id,
-          type: l.type,
           title: l.title,
           description: l.description,
-          price: l.price,
+          price: Number(l.price),
           currency: l.currency,
           category: l.category,
           condition: l.condition,
           images: l.images || [],
-          location: l.location,
           campusId: l.campus_id,
-          universityId: l.university_id,
-          isPremium: l.is_premium,
           status: l.status,
+          isNegotiable: l.is_negotiable,
           createdAt: l.created_at,
           updatedAt: l.updated_at,
           author: l.author
-            ? { fullName: l.author.full_name, avatarUrl: l.author.avatar_url }
+            ? { fullName: l.author.full_name, avatarUrl: l.author.avatar_url, isVerified: l.author.is_verified }
             : undefined,
         }))
       : [];
@@ -93,9 +89,9 @@ export async function globalSearch(query: string): Promise<SearchResults> {
           fullName: u.full_name,
           avatarUrl: u.avatar_url,
           isVerified: u.is_verified,
-          trustScore: u.trust_score,
+          trustScore: Number(u.trust_score),
           campusId: u.campus_id,
-          createdAt: '',
+          createdAt: u.created_at || '',
         }))
       : [];
 

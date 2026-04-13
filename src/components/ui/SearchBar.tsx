@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiX, FiTrendingUp, FiPackage, FiUser } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 import { globalSearch, debounce } from '../../services/searchService';
-import type { SearchResults } from '../../types';
+import type { SearchResults } from '@/types';
 
 export function SearchBar() {
   const router = useRouter();

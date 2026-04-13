@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { Button } from './Button';
+import { Button } from '@/components/Button';
 import { IconType } from 'react-icons';
 
 interface EmptyStateProps {

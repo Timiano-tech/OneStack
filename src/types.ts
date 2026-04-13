@@ -106,6 +106,12 @@ export interface Post {
   author?: Partial<User>;
 }
 
+export interface SearchResults {
+  posts: Post[];
+  listings: Listing[];
+  users: Partial<User>[];
+}
+
 export interface Comment {
   id: string;
   postId?: string;
@@ -136,6 +142,7 @@ export interface Listing {
   condition?: Condition;
   images: string[];
   status: 'active' | 'sold' | 'reserved' | 'expired' | 'deleted';
+  isPremium?: boolean;
   isNegotiable: boolean;
   meetupLocation?: string;
   tags: string[];
