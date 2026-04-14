@@ -11,6 +11,7 @@ const defaultTransition = { duration: 0.2, ease: 'easeOut' as const };
 interface AnimatedPageProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   variants?: typeof defaultVariants;
   transition?: typeof defaultTransition;
 }
@@ -18,6 +19,7 @@ interface AnimatedPageProps {
 export function AnimatedPage({
   children,
   className = '',
+  style,
   variants = defaultVariants,
   transition = defaultTransition,
 }: AnimatedPageProps) {
@@ -29,6 +31,7 @@ export function AnimatedPage({
       variants={variants}
       transition={transition}
       className={className}
+      style={style}
     >
       {children}
     </motion.div>

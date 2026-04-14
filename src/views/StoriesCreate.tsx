@@ -42,7 +42,12 @@ export function StoriesCreate() {
     if (!user || !file) return;
     setLoading(true);
     try {
-      await createStory(user.id, (user as any).campusId, file, caption);
+      await createStory({
+        userId: user.id,
+        campusId: (user as any).campusId,
+        file,
+        caption
+      });
       toast.success('Story posted!');
       router.push('/feed');
     } catch (err: any) {

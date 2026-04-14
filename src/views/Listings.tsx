@@ -271,7 +271,7 @@ export function Listings() {
                     {listing.currency} {listing.price.toLocaleString()}
                   </p>
                   <p className="text-xs line-clamp-1" style={{ color: 'var(--text-muted)' }}>
-                    {listing.location} · {listing.category}
+                    {listing.meetupLocation} · {listing.category}
                   </p>
                   {listing.condition && (
                     <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium capitalize" style={{ background: 'var(--surface-elevated)', color: 'var(--text-secondary)' }}>

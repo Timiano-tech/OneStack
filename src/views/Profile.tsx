@@ -126,14 +126,13 @@ export function Profile() {
     email: authUser?.email || '',
     isVerified: false,
     trustScore: 0,
-    universityId: '',
     campusId: '',
     createdAt: '',
     updatedAt: '',
     role: 'user',
     bio: '',
     major: '',
-    gradYear: '',
+    graduationYear: 0,
     interests: [],
     socialLinks: {},
     privacySettings: {
@@ -342,7 +341,7 @@ export function Profile() {
           fullName: displayUser.fullName,
           bio: displayUser.bio,
           major: displayUser.major,
-          gradYear: displayUser.gradYear,
+          graduationYear: displayUser.graduationYear,
         }}
       />
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />

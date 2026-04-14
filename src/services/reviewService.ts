@@ -32,6 +32,8 @@ export async function addReview(params: {
     listingId: data.listing_id,
     rating: data.rating,
     comment: data.comment,
+    aspects: data.aspects,
+    isAnonymous: data.is_anonymous,
     createdAt: data.created_at,
   };
 }
@@ -58,6 +60,8 @@ export async function getUserReviews(userId: string): Promise<Review[]> {
     listingId: r.listing_id,
     rating: r.rating,
     comment: r.comment,
+    aspects: r.aspects,
+    isAnonymous: r.is_anonymous,
     createdAt: r.created_at,
     reviewer: r.reviewer
       ? { fullName: r.reviewer.full_name, avatarUrl: r.reviewer.avatar_url }

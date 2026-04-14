@@ -15,7 +15,7 @@ interface EditProfileModalProps {
     fullName?: string;
     bio?: string;
     major?: string;
-    gradYear?: number;
+    graduationYear?: number;
   };
 }
 
@@ -25,7 +25,7 @@ export function EditProfileModal({ open, onClose, onSaved, initialValues }: Edit
     fullName: initialValues?.fullName || '',
     bio: initialValues?.bio || '',
     major: initialValues?.major || '',
-    gradYear: initialValues?.gradYear?.toString() || '',
+    graduationYear: initialValues?.graduationYear?.toString() || '',
   });
   const [saving, setSaving] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
@@ -44,7 +44,7 @@ export function EditProfileModal({ open, onClose, onSaved, initialValues }: Edit
           full_name: form.fullName.trim(),
           bio: form.bio.trim() || null,
           major: form.major.trim() || null,
-          grad_year: form.gradYear ? parseInt(form.gradYear) : null,
+          grad_year: form.graduationYear ? parseInt(form.graduationYear) : null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -118,8 +118,8 @@ export function EditProfileModal({ open, onClose, onSaved, initialValues }: Edit
           </label>
           <input
             type="number"
-            value={form.gradYear}
-            onChange={(e) => setForm((f) => ({ ...f, gradYear: e.target.value }))}
+            value={form.graduationYear}
+            onChange={(e) => setForm((f) => ({ ...f, graduationYear: e.target.value }))}
             className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none"
             style={{ borderColor: 'var(--border)', background: 'var(--surface-elevated)', color: 'var(--text)' }}
             placeholder="2026"

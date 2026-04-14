@@ -273,9 +273,13 @@ export interface Review {
   listingId?: string;
   rating: number;
   comment?: string;
-  aspects: Record<string, number>;
-  isAnonymous: boolean;
+  aspects?: Record<string, number>;
+  isAnonymous?: boolean;
   revieweeResponse?: string;
   respondedAt?: string;
   createdAt: string;
+  reviewer?: {
+    fullName: string;
+    avatarUrl?: string;
+  };
 }
