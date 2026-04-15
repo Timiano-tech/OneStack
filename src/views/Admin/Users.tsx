@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiShield, FiMoreVertical } from 'react-icons/fi';
@@ -139,3 +141,4 @@ export function Users() {
     </AnimatedPage>
   );
 }
+

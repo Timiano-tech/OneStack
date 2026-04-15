@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -306,7 +308,7 @@ export function CreateListing() {
               className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
             />
             <span className="text-sm text-slate-700 dark:text-slate-300">
-              Boost visibility (Premium only) — feature at top of feed
+              Boost visibility (Premium only) â€” feature at top of feed
             </span>
           </label>
 
@@ -327,3 +329,4 @@ export function CreateListing() {
     </AnimatedPage>
   );
 }
+

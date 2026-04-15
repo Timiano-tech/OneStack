@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -132,3 +134,4 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
     </div>
   );
 }
+

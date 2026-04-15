@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiFlag, FiCheck, FiX } from 'react-icons/fi';
@@ -67,7 +69,7 @@ export function Reports() {
                     </p>
                   )}
                   <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                    {report.createdAt} · {report.status}
+                    {report.createdAt} Â· {report.status}
                   </p>
                 </div>
               </div>
@@ -94,3 +96,4 @@ export function Reports() {
     </AnimatedPage>
   );
 }
+

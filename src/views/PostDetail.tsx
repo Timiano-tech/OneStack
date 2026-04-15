@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FiArrowLeft } from 'react-icons/fi';
@@ -169,3 +171,4 @@ export function PostDetail() {
     </AnimatedPage>
   );
 }
+

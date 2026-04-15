@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiEye, FiTrash2 } from 'react-icons/fi';
@@ -111,7 +113,7 @@ export function Listings() {
                     {listing.reported ? (
                       <span className="text-amber-600 dark:text-amber-400">Yes</span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400">â€”</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
@@ -136,3 +138,4 @@ export function Listings() {
     </AnimatedPage>
   );
 }
+
