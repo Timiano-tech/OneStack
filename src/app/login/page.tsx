@@ -1,3 +1,11 @@
 "use client";
-import { Login } from '../../views/Login';
-export default function LoginPage() { return <Login />; }
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function LoginPage() { 
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/auth');
+  }, [router]);
+  return null;
+}

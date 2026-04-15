@@ -1,3 +1,11 @@
 "use client";
-import { Register } from '../../views/Register';
-export default function RegisterPage() { return <Register />; }
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function RegisterPage() { 
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/auth');
+  }, [router]);
+  return null;
+}

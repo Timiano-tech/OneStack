@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white dark:bg-[#1E293B] md:hidden safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white dark:bg-[#0B0F19] md:hidden safe-area-bottom px-2"
       style={{ borderColor: 'var(--border)' }}
     >
       <div className="flex items-center justify-around px-2 py-1">
@@ -31,9 +31,9 @@ export function BottomNav() {
             >
               {primary ? (
                 <div
-                  className="flex h-12 w-12 -mt-6 items-center justify-center rounded-full border border-blue-600"
+                  className="flex h-12 w-12 -mt-6 items-center justify-center rounded-full border-2 border-white dark:border-[#0B0F19] shadow-lg"
                   style={{ 
-                    background: 'var(--primary)', 
+                    background: '#D60000', 
                     color: 'white',
                   }}
                 >

@@ -16,7 +16,7 @@ interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent text-white shadow-soft font-semibold hover:opacity-90 active:opacity-100 transition-opacity',
+    'bg-[#D60000] text-white shadow-soft font-semibold hover:opacity-90 active:opacity-100 transition-opacity',
   secondary:
     'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 active:bg-slate-100 dark:bg-[#111827] dark:border-slate-800 dark:text-slate-100 dark:hover:bg-slate-900',
   ghost:
@@ -49,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const base = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
+    const base = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#D60000] focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
     const cls = [
       base,
       variants[variant],

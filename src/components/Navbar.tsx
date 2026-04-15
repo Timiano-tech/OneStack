@@ -26,7 +26,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
+    router.replace('/auth');
     setAvatarMenuOpen(false);
   };
 
@@ -39,11 +39,8 @@ export function Navbar() {
         
         {/* Logo */}
         <Link href="/" className="flex min-w-0 items-center gap-2.5 shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl"
-            style={{ background: 'var(--primary)' }}>
-            <img src="/OneStack (1).png" alt="Logo" className="h-full w-full object-contain" 
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <span className="text-white font-black text-sm">O</span>
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-[#D60000]">
+            <span className="text-white font-black text-lg">O</span>
           </div>
           <span className="truncate text-base font-bold tracking-tight" style={{ color: 'var(--text)' }}>
             {SITE.appName}
@@ -184,10 +181,9 @@ export function Navbar() {
                   Log in
                 </motion.span>
               </Link>
-              <Link href="/register">
+              <Link href="/auth">
                 <motion.span
-                  className="flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white"
-                  style={{ background: 'var(--primary)', boxShadow: 'var(--shadow-blue)' }}
+                  className="flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white bg-[#D60000]"
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
                 >

@@ -5,7 +5,7 @@ import { Navbar } from './Navbar';
 import { BottomNav } from './BottomNav';
 
 const BOTTOM_NAV_ROUTES = ['/', '/listings', '/listing/create', '/chat', '/profile'];
-const HIDE_NAV_ROUTES = ['/login', '/register', '/forgot-password', '/pricing'];
+const HIDE_NAV_ROUTES = ['/auth', '/login', '/register', '/forgot-password', '/pricing'];
 
 export function AppLayout({
   children,
