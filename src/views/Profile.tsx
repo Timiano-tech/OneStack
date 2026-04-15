@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiLogOut, FiZap, FiGrid, FiList, FiUserPlus, FiUserCheck } from 'react-icons/fi';

@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -96,7 +98,7 @@ export function Login() {
             <Input
               label="Password"
               type="password"
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               leftIcon={FiLock}
@@ -151,3 +153,4 @@ export function Login() {
     </AnimatedPage>
   );
 }
+

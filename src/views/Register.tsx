@@ -1,3 +1,5 @@
+﻿"use client";
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -206,7 +208,7 @@ export function Register() {
                 <Input
                   label="Password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                   leftIcon={FiLock}
@@ -304,3 +306,4 @@ export function Register() {
     </AnimatedPage>
   );
 }
+
