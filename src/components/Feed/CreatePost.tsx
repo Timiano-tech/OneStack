@@ -1,7 +1,9 @@
+﻿"use client";
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import imageCompression from 'browser-image-compression';
-import * as FilterModule from 'bad-words';
+import { Filter } from 'bad-words';
 import { FiImage, FiX } from 'react-icons/fi';
 import { Button } from '../Button';
 import { toast } from '../Toast';
@@ -81,8 +83,7 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
       return;
     }
 
-    const FilterConstructor = (FilterModule as any).default || FilterModule;
-    const filter = new FilterConstructor();
+    const filter = new Filter();
     if (filter.isProfane(content)) {
       toast.error('Please remove inappropriate language from your post before submitting.');
       return;
@@ -253,3 +254,4 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
     </div>
   );
 }
+

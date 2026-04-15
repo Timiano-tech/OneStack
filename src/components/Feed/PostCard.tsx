@@ -1,3 +1,5 @@
+﻿"use client";
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -136,7 +138,7 @@ export const PostCard = React.memo(function PostCard({ post, onLikeChange, onSav
               { (post as any).isPremium && <PremiumBadge tier="pro" size="sm" /> }
             </div>
             <div className="mt-1 text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>
-              {post.category} • {formatDistanceToNow(post.createdAt)}
+              {post.category} â€¢ {formatDistanceToNow(post.createdAt)}
             </div>
           </div>
         </Link>
@@ -197,13 +199,13 @@ export const PostCard = React.memo(function PostCard({ post, onLikeChange, onSav
                 onClick={(e) => { e.preventDefault(); setCurrentImageIdx((i) => (i === 0 ? post.images.length - 1 : i - 1)); }}
                 className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition hover:bg-black/60"
               >
-                ‹
+                â€¹
               </button>
               <button
                 onClick={(e) => { e.preventDefault(); setCurrentImageIdx((i) => (i === post.images.length - 1 ? 0 : i + 1)); }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition hover:bg-black/60"
               >
-                ›
+                â€º
               </button>
             </>
           )}
@@ -211,8 +213,8 @@ export const PostCard = React.memo(function PostCard({ post, onLikeChange, onSav
       )}
 
       {/* Footer / Interaction Bar */}
-      <div className="flex items-center justify-between border-t px-4 py-3" style={{ borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-6">
+      <div className="flex items-center justify-between border-t px-4 py-2" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-5">
           <LikeButton
             isLiked={isLiked}
             count={likeCount}
@@ -221,34 +223,38 @@ export const PostCard = React.memo(function PostCard({ post, onLikeChange, onSav
           
           <Link
             href={`/feed/post/${post.id}`}
-            className="flex items-center gap-1.5 transition-colors hover:opacity-70"
+            className="flex items-center gap-1.5 p-2 rounded-lg transition-all hover:bg-[var(--primary-muted)]"
             style={{ color: 'var(--text-secondary)' }}
           >
             <FiMessageCircle size={20} />
-            <span className="text-sm font-medium">{post.commentCount}</span>
+            <span className="text-sm font-semibold">{post.commentCount}</span>
           </Link>
 
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 transition-colors hover:opacity-70"
+            className="flex items-center gap-1.5 p-2 rounded-lg transition-all hover:bg-[var(--primary-muted)]"
             style={{ color: 'var(--text-secondary)' }}
           >
             <FiShare2 size={20} />
-            { post.shareCount > 0 && <span className="text-sm font-medium">{post.shareCount}</span> }
+            { post.shareCount > 0 && <span className="text-sm font-semibold">{post.shareCount}</span> }
           </button>
         </div>
 
         <button
           onClick={handleSave}
-          className="flex items-center transition-all"
-          style={{ color: isSaved ? 'var(--secondary)' : 'var(--text-secondary)' }}
+          className="flex items-center p-2 rounded-lg transition-all"
         >
-          <motion.div whileTap={{ scale: 0.8 }} className="flex items-center gap-1.5">
+          <motion.div 
+            whileTap={{ scale: 0.8 }} 
+            className="flex items-center gap-1.5"
+            style={{ color: isSaved ? 'var(--secondary)' : 'var(--text-secondary)' }}
+          >
             <FiBookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
-            <span className="text-sm font-medium">{saveCount}</span>
+            <span className="text-sm font-semibold">{saveCount}</span>
           </motion.div>
         </button>
       </div>
     </div>
   );
 });
+
