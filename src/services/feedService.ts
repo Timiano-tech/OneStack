@@ -97,12 +97,14 @@ export async function getFeedPosts({
   campusId,
   category,
   isTrending = false,
-  lastPage = 0,
+  cursor,
+  limit = 10,
 }: {
   campusId?: string;
   category?: string;
   isTrending?: boolean;
-  lastPage?: number;
+  cursor?: string;
+  limit?: number;
 }) {
   let query = supabase
     .from(POSTS_TABLE)
@@ -119,15 +121,22 @@ export async function getFeedPosts({
   if (campusId) query = query.eq('campus_id', campusId);
   if (category && category !== 'All') query = query.eq('category', category);
 
+  if (cursor) {
+    if (isTrending) {
+      const { score, time } = JSON.parse(cursor);
+      query = query.or(`trending_score.lt.${score},and(trending_score.eq.${score},created_at.lt.${time})`);
+    } else {
+      query = query.lt('created_at', cursor);
+    }
+  }
+
   if (isTrending) {
     query = query.order('trending_score', { ascending: false }).order('created_at', { ascending: false });
   } else {
     query = query.order('created_at', { ascending: false });
   }
 
-  const from = lastPage * POSTS_PER_PAGE;
-  const to = from + POSTS_PER_PAGE - 1;
-  query = query.range(from, to);
+  query = query.limit(limit);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -157,9 +166,19 @@ export async function getFeedPosts({
     } : undefined
   } as Post));
 
+  let nextCursor = null;
+  if (posts.length === limit) {
+    const lastPost = posts[posts.length - 1];
+    if (isTrending) {
+      nextCursor = JSON.stringify({ score: lastPost.trendingScore, time: lastPost.createdAt });
+    } else {
+      nextCursor = lastPost.createdAt;
+    }
+  }
+
   return {
     posts,
-    nextPage: posts.length === POSTS_PER_PAGE ? lastPage + 1 : null,
+    nextCursor,
   };
 }
 

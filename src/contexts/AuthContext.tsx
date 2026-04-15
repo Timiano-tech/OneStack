@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -55,9 +57,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user).then(() => setLoading(false));
+    // Check initial session
+    supabase.auth.getUser().then(({ data: { user: supabaseUser } }) => {
+      if (supabaseUser) {
+        fetchProfile(supabaseUser).then(() => setLoading(false));
       } else {
         setUser(null);
         setLoading(false);

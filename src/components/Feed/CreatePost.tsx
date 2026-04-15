@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import imageCompression from 'browser-image-compression';
+import * as FilterModule from 'bad-words';
 import { FiImage, FiX } from 'react-icons/fi';
 import { Button } from '../Button';
 import { toast } from '../Toast';
@@ -23,7 +25,7 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
   const [images, setImages] = useState<{ file: File; url: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
     
@@ -32,12 +34,31 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
       return;
     }
 
-    const newImages = files.map(file => ({
-      file,
-      url: URL.createObjectURL(file)
-    }));
+    setLoading(true);
+    try {
+      const compressedImages = await Promise.all(
+        files.map(async (file) => {
+          const options = {
+            maxWidthOrHeight: 1080,
+            useWebWorker: true,
+            initialQuality: 0.85,
+            fileType: file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+          };
+          const compressedFile = await imageCompression(file, options);
+          return {
+            file: compressedFile as File,
+            url: URL.createObjectURL(compressedFile)
+          };
+        })
+      );
 
-    setImages(prev => [...prev, ...newImages]);
+      setImages(prev => [...prev, ...compressedImages]);
+    } catch (error) {
+      console.error('Compression error:', error);
+      toast.error('Failed to process image.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -57,6 +78,13 @@ export function CreatePost({ onSuccess, onClose }: CreatePostProps) {
     }
     if (!user) {
       toast.error('You must be logged in to post.');
+      return;
+    }
+
+    const FilterConstructor = (FilterModule as any).default || FilterModule;
+    const filter = new FilterConstructor();
+    if (filter.isProfane(content)) {
+      toast.error('Please remove inappropriate language from your post before submitting.');
       return;
     }
 

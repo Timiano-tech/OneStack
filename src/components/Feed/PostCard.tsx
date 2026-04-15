@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FiMessageCircle, FiCheckCircle, FiMoreHorizontal, FiShare2, FiBookmark } from 'react-icons/fi';
@@ -16,7 +16,7 @@ interface PostCardProps {
   onSaveChange?: (postId: string, newSaveCount: number, isSaved: boolean) => void;
 }
 
-export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
+export const PostCard = React.memo(function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -251,4 +251,4 @@ export function PostCard({ post, onLikeChange, onSaveChange }: PostCardProps) {
       </div>
     </div>
   );
-}
+});

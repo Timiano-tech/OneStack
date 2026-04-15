@@ -40,6 +40,7 @@ export function Chat() {
   const channelRef = useRef<any>(null);
   const typingChannelRef = useRef<any>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingBroadcastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize conversations
   useEffect(() => {
@@ -51,7 +52,7 @@ export function Chat() {
         setRooms(conversations);
 
         if (listingId && sellerId && sellerId !== user.id) {
-          const convoId = await getOrCreateConversation(user.id, sellerId, listingId);
+          const convoId = await getOrCreateConversation(user.id, sellerId);
           const activeConvo = conversations.find(c => c.id === convoId);
           if (activeConvo) {
             setSelectedRoom(activeConvo);
@@ -118,11 +119,15 @@ export function Chat() {
 
   const broadcastTyping = () => {
     if (!selectedRoom || !user) return;
-    supabase.channel(`typing:${selectedRoom.id}`).send({
-      type: 'broadcast',
-      event: 'typing',
-      payload: { userId: user.id },
-    });
+    
+    if (typingBroadcastTimeout.current) clearTimeout(typingBroadcastTimeout.current);
+    typingBroadcastTimeout.current = setTimeout(() => {
+      supabase.channel(`typing:${selectedRoom.id}`).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { userId: user.id },
+      });
+    }, 500);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

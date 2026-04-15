@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FiHome, FiGrid, FiPlus, FiMessageCircle, FiUser } from 'react-icons/fi';
 
 const tabs = [
@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 glass-nav border-t md:hidden safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white dark:bg-[#1E293B] md:hidden safe-area-bottom"
       style={{ borderColor: 'var(--border)' }}
     >
       <div className="flex items-center justify-around px-2 py-1">
@@ -30,42 +30,29 @@ export function BottomNav() {
               className="relative flex flex-1 flex-col items-center justify-center py-2"
             >
               {primary ? (
-                <motion.div
-                  className="flex h-12 w-12 -mt-6 items-center justify-center rounded-2xl shadow-lg"
+                <div
+                  className="flex h-12 w-12 -mt-6 items-center justify-center rounded-full border border-blue-600"
                   style={{ 
                     background: 'var(--primary)', 
                     color: 'white',
-                    boxShadow: 'var(--shadow-blue)'
                   }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.9 }}
                 >
-                  <Icon size={24} strokeWidth={3} />
-                </motion.div>
+                  <Icon size={24} strokeWidth={2.5} />
+                </div>
               ) : (
                 <div className="relative flex flex-col items-center gap-0.5">
-                  <motion.span
+                  <span
                     className="relative z-10 p-1.5 transition-colors"
                     style={{ color: active ? 'var(--primary)' : 'var(--text-muted)' }}
-                    animate={{ scale: active ? 1.1 : 1 }}
                   >
                     <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-                  </motion.span>
+                  </span>
                   <span
-                    className="text-[9px] font-bold uppercase tracking-tighter"
+                    className="text-[10px] font-semibold uppercase tracking-tight"
                     style={{ color: active ? 'var(--primary)' : 'var(--text-muted)' }}
                   >
                     {label}
                   </span>
-                  
-                  {active && (
-                    <motion.div
-                      layoutId="bottomNavDot"
-                      className="absolute -top-1 h-1 w-1 rounded-full"
-                      style={{ background: 'var(--primary)' }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    />
-                  )}
                 </div>
               )}
             </Link>

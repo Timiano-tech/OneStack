@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiTrendingUp, FiMapPin, FiGrid, FiPlus, FiRefreshCw } from 'react-icons/fi';
 import { AnimatedPage } from '../components/AnimatedPage';
@@ -7,8 +7,9 @@ import { CreatePost } from '../components/Feed/CreatePost';
 import { PostCard } from '../components/Feed/PostCard';
 import { StoryReel } from '../components/Feed/StoryReel';
 import { PostCardSkeleton, StoryReelSkeleton } from '../components/ui/SkeletonLoader';
-import { getFeedPosts } from '../services/feedService';
 import { useAuth } from '../contexts/AuthContext';
+import { useFeed } from '../hooks/useFeed';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Post } from '../types';
 import { containerVariants, itemVariants } from '../lib/animations';
 
@@ -16,44 +17,28 @@ type FeedTab = 'campus' | 'trending' | 'categories';
 
 export function Feed() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<FeedTab>('campus');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
 
-  const fetchPosts = useCallback(async (reset = false) => {
-    try {
-      if (reset) { setLoading(true); }
-      const pageToFetch = reset ? 0 : currentPage;
-      const result = await getFeedPosts({
-        campusId: activeTab === 'campus' ? (user as any)?.campusId : undefined,
-        category: activeTab === 'categories' ? activeCategory : undefined,
-        isTrending: activeTab === 'trending',
-        lastPage: pageToFetch,
-      });
-      setPosts(prev => reset ? result.posts : [...prev, ...result.posts]);
-      setCurrentPage(result.nextPage ?? 0);
-      setHasMore(result.nextPage !== null);
-    } catch (error) {
-      console.error('Failed to fetch posts', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [activeTab, activeCategory, user, currentPage]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    refetch
+  } = useFeed(activeTab, activeCategory);
 
-  useEffect(() => {
-    fetchPosts(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, activeCategory]);
+  const posts = data?.pages.flatMap(p => p.posts) || [];
+  const loading = isFetching && !isFetchingNextPage;
+  const hasMore = hasNextPage;
+  const refreshing = isFetching && !isFetchingNextPage && posts.length > 0;
 
   const handleScroll = (e: React.UIEvent<HTMLElement>) => {
     const bottom = e.currentTarget.scrollHeight - e.currentTarget.scrollTop <= e.currentTarget.clientHeight + 150;
-    if (bottom && !loading && hasMore) fetchPosts();
+    if (bottom && !isFetchingNextPage && hasNextPage) fetchNextPage();
   };
 
   // Pull to refresh
@@ -61,9 +46,8 @@ export function Feed() {
   const handleTouchStart = (e: React.TouchEvent) => { startY = e.touches[0].clientY; };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = e.changedTouches[0].clientY - startY;
-    if (diff > 80 && !refreshing && !loading) {
-      setRefreshing(true);
-      fetchPosts(true);
+    if (diff > 80 && !isFetching) {
+      refetch();
     }
   };
 
@@ -180,7 +164,7 @@ export function Feed() {
                 >
                   <CreatePost
                     onClose={() => setIsCreateOpen(false)}
-                    onSuccess={() => fetchPosts(true)}
+                    onSuccess={() => refetch()}
                   />
                 </motion.div>
               )}
@@ -203,10 +187,28 @@ export function Feed() {
                     <PostCard
                       post={post}
                       onLikeChange={(id, count) => {
-                        setPosts(prev => prev.map(p => p.id === id ? { ...p, likeCount: count } : p));
+                        queryClient.setQueryData(['feed', activeTab, activeCategory, (user as any)?.campusId], (oldData: any) => {
+                          if (!oldData) return oldData;
+                          return {
+                            ...oldData,
+                            pages: oldData.pages.map((page: any) => ({
+                              ...page,
+                              posts: page.posts.map((p: any) => p.id === id ? { ...p, likeCount: count } : p)
+                            }))
+                          };
+                        });
                       }}
                       onSaveChange={(id, count) => {
-                        setPosts(prev => prev.map(p => p.id === id ? { ...p, saveCount: count } : p));
+                        queryClient.setQueryData(['feed', activeTab, activeCategory, (user as any)?.campusId], (oldData: any) => {
+                          if (!oldData) return oldData;
+                          return {
+                            ...oldData,
+                            pages: oldData.pages.map((page: any) => ({
+                              ...page,
+                              posts: page.posts.map((p: any) => p.id === id ? { ...p, saveCount: count } : p)
+                            }))
+                          };
+                        });
                       }}
                     />
                   </motion.div>
