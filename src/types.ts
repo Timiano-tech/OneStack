@@ -2,7 +2,7 @@
 // Synchronized with definitive database schema
 
 export type ListingType = 'buy' | 'sell' | 'service';
-export type Condition = 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+export type Condition = 'new' | 'like_new' | 'good' | 'fair' | 'poor' | 'for_parts';
 
 export const LISTING_CATEGORIES = [
   'Textbooks',
@@ -139,6 +139,7 @@ export interface Listing {
   price: number;
   currency: string;
   category: ItemCategory;
+  type: ListingType;
   condition?: Condition;
   images: string[];
   status: 'active' | 'sold' | 'reserved' | 'expired' | 'deleted';

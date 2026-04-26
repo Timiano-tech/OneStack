@@ -130,16 +130,23 @@ export function Profile() {
     campusId: '',
     createdAt: '',
     updatedAt: '',
-    role: 'user',
     bio: '',
     major: '',
     graduationYear: 0,
-    interests: [],
-    socialLinks: {},
+    isBanned: false,
+    notificationPreferences: {
+      push: true,
+      email: true,
+      likes: true,
+      comments: true,
+      follows: true,
+      messages: true,
+      marketplace: true,
+    },
     privacySettings: {
-      showEmail: false,
-      showActivity: true,
-      allowMessages: 'everyone'
+      profileVisibility: 'public',
+      showOnlineStatus: true,
+      allowMessagesFrom: 'everyone'
     },
     subscriptionTier: 'free'
   };

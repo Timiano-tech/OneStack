@@ -29,6 +29,8 @@ export async function getCampusStories(campusId: string, userId: string): Promis
     campusId: s.campus_id,
     expiresAt: s.expires_at,
     viewCount: s.view_count || 0,
+    backgroundColor: s.background_color || '#000000',
+    stickerData: s.sticker_data || [],
     createdAt: s.created_at,
     author: s.author
       ? { fullName: s.author.full_name, avatarUrl: s.author.avatar_url }
@@ -81,12 +83,16 @@ export async function viewStory(storyId: string, viewerId: string): Promise<void
     .upsert({ story_id: storyId, viewer_id: viewerId }, { onConflict: 'story_id,viewer_id' });
 
   // Increment view count
-  await supabase.rpc('increment_story_views', { story_id: storyId }).catch(() => {
+  try {
+    const { error } = await supabase.rpc('increment_story_views', { story_id: storyId });
+    if (error) throw error;
+  } catch (err) {
     // Fallback if RPC doesn't exist
-    supabase.from('stories').select('view_count').eq('id', storyId).single().then(({ data }) => {
-      supabase.from('stories').update({ view_count: (data?.view_count || 0) + 1 }).eq('id', storyId);
-    });
-  });
+    const { data } = await supabase.from('stories').select('view_count').eq('id', storyId).single();
+    if (data) {
+      await supabase.from('stories').update({ view_count: (data.view_count || 0) + 1 }).eq('id', storyId);
+    }
+  }
 }
 
 export async function deleteStory(storyId: string): Promise<void> {
@@ -111,6 +117,8 @@ export async function getUserStories(userId: string): Promise<Story[]> {
     campusId: s.campus_id,
     expiresAt: s.expires_at,
     viewCount: s.view_count || 0,
+    backgroundColor: s.background_color || '#000000',
+    stickerData: s.sticker_data || [],
     createdAt: s.created_at,
   }));
 }

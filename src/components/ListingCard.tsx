@@ -80,7 +80,7 @@ export function ListingCard({
           </div>
 
           {/* Content segment */}
-          <div className="p-3.5 flex flex-col flex-grow">
+          <div className="p-3.5 flex flex-col grow">
             <h3 className="line-clamp-1 text-sm font-bold" style={{ color: 'var(--text)' }}>
               {listing.title}
             </h3>

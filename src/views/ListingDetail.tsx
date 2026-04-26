@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -163,10 +163,10 @@ export function ListingDetail() {
               Condition: {listing.condition.replace('_', ' ')}
             </p>
           )}
-          {listing.location && (
+          {listing.meetupLocation && (
             <p className="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
               <FiMapPin size={16} />
-              {listing.location}
+              {listing.meetupLocation}
             </p>
           )}
         </div>

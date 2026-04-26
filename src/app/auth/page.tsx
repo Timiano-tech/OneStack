@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -476,11 +476,13 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <AnimatePresence mode="wait">
-            {tab === 'login'
-              ? <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><LoginForm onSwitch={() => setTab('register')} /></motion.div>
-              : <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><RegisterForm onSwitch={() => setTab('login')} /></motion.div>}
-          </AnimatePresence>
+          <Suspense fallback={<div className="py-20 text-center text-sm text-slate-500">Loading...</div>}>
+            <AnimatePresence mode="wait">
+              {tab === 'login'
+                ? <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><LoginForm onSwitch={() => setTab('register')} /></motion.div>
+                : <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><RegisterForm onSwitch={() => setTab('login')} /></motion.div>}
+            </AnimatePresence>
+          </Suspense>
         </motion.div>
 
         <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-600">

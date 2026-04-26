@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -34,6 +34,7 @@ export function CreateListing() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isPremium, setIsPremium] = useState(false);
+  const [isNegotiable, setIsNegotiable] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -98,7 +99,7 @@ export function CreateListing() {
     }
     setLoading(true);
     try {
-      const listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'> = {
+      const listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt' | 'viewCount' | 'inquiryCount'> = {
         userId: user.id,
         type,
         title,
@@ -108,11 +109,13 @@ export function CreateListing() {
         category: category as any,
         condition: type === 'service' ? undefined : condition,
         images: [], // Will be filled by service
-        location,
+        meetupLocation: location,
         campusId: user.campusId || '',
-        universityId: user.universityId || '',
         isPremium,
+        isNegotiable,
         status: 'active',
+        tags: [],
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       };
 
       await createListing(listingData, imageFiles);
@@ -230,6 +233,18 @@ export function CreateListing() {
             </div>
           </div>
 
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={isNegotiable}
+              onChange={(e) => setIsNegotiable(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+            />
+            <span className="text-sm text-slate-700 dark:text-slate-300">
+              Price is negotiable
+            </span>
+          </label>
+
           {type !== 'service' && (
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -308,7 +323,7 @@ export function CreateListing() {
               className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
             />
             <span className="text-sm text-slate-700 dark:text-slate-300">
-              Boost visibility (Premium only) â€” feature at top of feed
+              Boost visibility (Premium only) — feature at top of feed
             </span>
           </label>
 
